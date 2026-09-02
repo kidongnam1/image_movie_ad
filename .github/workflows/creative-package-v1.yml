@@ -1,4 +1,4 @@
-name: Creative Package V1
+name: Creative and Media V1
 
 on:
   push:
@@ -22,3 +22,5 @@ jobs:
           python-version: '3.12'
       - name: Run Creative Package V1 tests
         run: python -m unittest discover -s content_script_collector_v2/tests -p 'test_creative_package_v1.py' -v
+      - name: Run MEDIA_RENDER_V1 tests
+        run: python -m unittest discover -s content_script_collector_v2/tests -p 'test_media_render_v1.py' -v

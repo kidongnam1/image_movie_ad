@@ -76,3 +76,37 @@ VERIFY_CREATIVE_PACKAGE_V1.bat
 - `manifest.json`
 
 상세 설명은 `CREATIVE_PACKAGE_V1_KO.md`를 참고하세요.
+
+---
+
+# MEDIA_RENDER_V1
+
+Creative Package 결과를 실제 미디어 파일과 FFmpeg 최종 MP4에 연결하는 렌더링 계층입니다.
+
+준비:
+
+```bat
+PREPARE_MEDIA_RENDER_V1.bat
+```
+
+최종 합성:
+
+```bat
+RENDER_FINAL_AD_V1.bat
+```
+
+핵심 기능:
+
+- `render_plan.json` 생성
+- Image / Video / TTS Provider 요청 JSON 생성
+- Scene 영상·voiceover·자막·FFmpeg readiness 검사
+- Scene 영상 자동 연결
+- Voiceover 길이 보정
+- BGM 선택 믹스
+- Logo 선택 오버레이
+- SRT 자막 Burn-in
+- `final/<variant>_ad_<duration>s.mp4` 출력
+
+외부 이미지/영상/TTS API는 비용과 API Key 확인이 필요한 단계이므로 직접 호출하지 않고 요청 파일과 자산 규격까지만 자동화합니다.
+
+상세 설명은 `MEDIA_RENDER_V1_KO.md`를 참고하세요.
