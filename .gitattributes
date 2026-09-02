@@ -1,0 +1,8 @@
+# Normalize line endings; Git stores LF, checks out CRLF on Windows for text files.
+* text=auto
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+*.xlsx binary
+*.sqlite binary
