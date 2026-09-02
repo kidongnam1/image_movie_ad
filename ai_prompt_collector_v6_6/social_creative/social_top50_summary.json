@@ -1,0 +1,114 @@
+{
+  "generated_at": "2026-09-02T11:49:50",
+  "candidate_count": 58,
+  "metadata_ok": 57,
+  "eligible_original_active": 54,
+  "errors": 1,
+  "top50_stars_count": 50,
+  "top50_recommended_count": 50,
+  "authenticated_github": true,
+  "top10_stars": [
+    {
+      "repo": "AUTOMATIC1111/stable-diffusion-webui",
+      "stars": 164765,
+      "category": "ai_image_engine"
+    },
+    {
+      "repo": "Comfy-Org/ComfyUI",
+      "stars": 131085,
+      "category": "ai_image_engine"
+    },
+    {
+      "repo": "opencv/opencv",
+      "stars": 90683,
+      "category": "image_processing"
+    },
+    {
+      "repo": "ultralytics/ultralytics",
+      "stars": 61174,
+      "category": "vision_ai"
+    },
+    {
+      "repo": "penpot/penpot",
+      "stars": 59469,
+      "category": "design_engine"
+    },
+    {
+      "repo": "remotion-dev/remotion",
+      "stars": 58030,
+      "category": "programmatic_video"
+    },
+    {
+      "repo": "facebookresearch/segment-anything",
+      "stars": 54784,
+      "category": "segmentation_ai"
+    },
+    {
+      "repo": "lllyasviel/Fooocus",
+      "stars": 52664,
+      "category": "ai_image_engine"
+    },
+    {
+      "repo": "TencentARC/GFPGAN",
+      "stars": 37664,
+      "category": "face_restoration_ai"
+    },
+    {
+      "repo": "xinntao/Real-ESRGAN",
+      "stars": 36661,
+      "category": "upscaling_ai"
+    }
+  ],
+  "top10_recommended": [
+    {
+      "repo": "Comfy-Org/ComfyUI",
+      "score": 90.74,
+      "stars": 131085
+    },
+    {
+      "repo": "danielgatis/rembg",
+      "score": 89.91,
+      "stars": 24579
+    },
+    {
+      "repo": "remotion-dev/remotion",
+      "score": 89.53,
+      "stars": 58030
+    },
+    {
+      "repo": "AUTOMATIC1111/stable-diffusion-webui",
+      "score": 87.75,
+      "stars": 164765
+    },
+    {
+      "repo": "vercel/satori",
+      "score": 86.77,
+      "stars": 13894
+    },
+    {
+      "repo": "lllyasviel/Fooocus",
+      "score": 86.7,
+      "stars": 52664
+    },
+    {
+      "repo": "invoke-ai/InvokeAI",
+      "score": 86.11,
+      "stars": 28107
+    },
+    {
+      "repo": "Acly/krita-ai-diffusion",
+      "score": 85.84,
+      "stars": 10532
+    },
+    {
+      "repo": "ultralytics/ultralytics",
+      "score": 85.7,
+      "stars": 61174
+    },
+    {
+      "repo": "facebookresearch/sam2",
+      "score": 84.44,
+      "stars": 19788
+    }
+  ]
+}

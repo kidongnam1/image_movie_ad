@@ -1,0 +1,37 @@
+﻿media_type,model_family,total_repos,active_repos,corpus_repos,tooling_repos,verified_originals,probable_originals,candidates,best_repo_quality,repos
+image,flux,3,3,2,1,1,2,0,92,Anil-matcha/awesome-flux-3-api-prompts | imagineVid/Awesome-flux-3-prompts-and-skills | fairy-root/Flux-Prompt-Generator
+image,flux_3,1,1,1,0,0,1,0,80,flaqai/awesome-flux-3-prompts
+image,gpt4o_gpt_image_1,2,2,2,0,2,0,0,96,jamez-bondos/awesome-gpt4o-images | ImgEdify/Awesome-GPT4o-Image-Prompts
+image,gpt_image_2,5,5,5,0,1,4,0,97,Toolcentral-ai/awesome-gpt-image-2-prompts | gptimage2prompts/gpt-image-2-prompts | EvoLinkAI/awesome-gpt-image-2-API-and-Prompts | Pixmind-io/awesome-gpt-image-2-prompts | wuyoscar/GPT-Image2-Skill
+image,gpt_image_2_commercial,1,1,1,0,0,1,0,83,JoeSai/awesome-gpt-image-2-commercial-prompts
+image,gpt_image_2_work,1,0,0,0,0,0,1,72,
+image,ideogram,6,4,2,2,2,2,2,92,EvoLinkAI/awesome-ideogram-4.0-prompts | galeep/ideogram-typography-prompts | AndyLeAI/Ideogram_JSON_Prompter | rlemson7/ideogrammar
+image,ideogram_4,1,1,1,0,0,1,0,78,Maritaminded209/awesome-ideogram-4.0-prompts
+image,midjourney,1,1,1,0,0,1,0,92,HebeDich/awesome-midjourney-prompts
+image,midjourney_v7,1,1,1,0,0,1,0,92,Pixmind-io/awesome-midjourney-v7-example-prompts
+image,midjourney_zh,1,1,1,0,0,1,0,78,midjgpt/awesome-midjourney-zh
+image,multi_image,16,6,5,1,2,4,10,95,AIGC-Hackers/awesome-ai-image-prompts-claude | Lizhizhiyi/awesome-ai-image-prompts | cliprise/awesome-ai-product-photography-prompts | dongyubin/Awesome-AI-Images-Prompts | tejasashinde/awesome-image-prompts | Hunyuan-PromptEnhancer/PromptEnhancer
+image,nano_banana,2,2,2,0,0,2,0,92,JimmyLv/awesome-nano-banana | loo-y/awesome-nano-banana-prompts
+image,nano_banana_pro,2,2,2,0,0,2,0,92,YouMind-OpenLab/awesome-nano-banana-pro-prompts | awesome2027/awesome-2k-nanobananapro-prompts
+image,nano_banana_pro_photoreal,1,1,1,0,0,1,0,81,GitHub30/Reproducible-Photorealistic-Nano-Banana-Pro-JSON-Prompts
+image,qwen_image,1,0,0,0,0,0,0,40,
+image,qwen_image_3,1,1,1,0,1,0,0,88,flaqai/awesome-qwen-image-3
+image,seedream_4,1,1,1,0,0,1,0,82,ToteBrick/awesome-seedream4.0
+image,seedream_4_5,1,1,1,0,0,1,0,92,YouMind-OpenLab/awesome-seedream-4.5
+image,seedream_5_pro,3,3,3,0,0,3,0,92,imagineVid/Awesome-seedream-5-pro-prompts-and-skills | EvoLinkAI/awesome-seedream-5.0-pro-prompts | velokey-ai/awesome-seedream-5.0-pro-prompts
+image,stable_diffusion,2,2,2,0,0,2,0,92,xutongbao/awesome-stable-diffusion-prompts | yuyan124/awesome-stable-diffusion-prompts
+video,ad_video_multi,1,1,1,0,0,1,0,92,LichAmnesia/awesome-ad-video-prompts
+video,cinematic_prompting,4,4,4,0,0,4,0,78,Eric-Lautanen/seamless-ai-video-prompt-template | songyileiwork/cinematic-ai-video-prompt-skill | wuwangzhang1216/DirectorSKILL | zhouwei713/fpv-immersive-video-prompting
+video,cogvideox_hunyuan,1,1,0,1,1,0,0,81,TemporalLabsLLC-SOL/TemporalPromptEngine
+video,higgsfield,1,1,0,1,1,0,0,89,OSideMedia/higgsfield-ai-prompt-skill
+video,kling,1,1,1,0,0,1,0,78,DSeaStar/awesome-kling
+video,kling_4,1,1,1,0,0,1,0,92,flaqai/awesome-kling-4-0
+video,ltx_video,2,2,1,1,2,0,0,84,quanluo/ltx-video-prompts | ObiriecLabs/ltx-director-prompter
+video,minimax_h3_cases,1,1,1,0,0,1,0,80,anupamme/awesome-minimax-h3-cases
+video,minimax_h3_hailuo,2,2,2,0,0,2,0,92,flaqai/awesome-minimax-h3-video-prompts | bestimageai/awesome-minimax-h3-video-prompts
+video,multi_video,15,10,7,3,2,8,5,92,songguoxs/awesome-video-prompts | VoidLight00/video-generation-prompts | cclank/lanshu-awesome-ai-video-kit | cliprise/awesome-ai-product-video-prompts | cliprise/awesome-ai-real-estate-video-prompts | cliprise/awesome-ai-ugc-video-prompts | cliprise/awesome-ai-video-ads-prompts | jijiutong/ai-visual-director | cajias/agentic-video-skills | YuuZhen/cinematic-storyboard-director
+video,seedance_2,3,3,3,0,0,3,0,92,YouMind-OpenLab/awesome-seedance-2-prompts | ZeroLu/awesome-seedance | weshopai/awesome-Seedance-2.0-prompt
+video,seedance_2_5,1,1,1,0,0,1,0,81,flaqai/awesome_seedance_2_5
+video,sora,2,2,2,0,0,2,0,92,hr98w/awesome-sora-prompts | duyuanchao/awesome-sora-prompts
+video,veo_3,1,1,1,0,0,1,0,92,liu-kaining/Awesome-Veo3-Prompts
+video,wan_3,4,3,3,0,0,3,1,92,flaqai/awesome_wan-3-0-prompts | bestimageai/awesome_wan-3-0-prompts | imagineVid/Awesome-wan-3-0-prompts-and-skills

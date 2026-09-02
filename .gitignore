@@ -1,0 +1,17 @@
+# Superseded tool version (kept locally only; v6_6 is the published version)
+/ai_prompt_collector_v6_1/
+
+# Vendored third-party GitHub repos collected by the tooling (regenerate via *.bat scripts)
+/ai_prompt_collector_v6_6/social_creative/SOCIAL_CREATIVE_LIBRARY/repos/
+/ai_prompt_collector_v6_6/social_creative/SOCIAL_CREATIVE_LIBRARY/logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# Runtime logs
+content_script_collector_v2/logs/
+
+# OS
+Thumbs.db
+.DS_Store

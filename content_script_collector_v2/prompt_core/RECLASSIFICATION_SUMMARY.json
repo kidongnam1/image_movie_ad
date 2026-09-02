@@ -1,0 +1,14 @@
+{
+  "active_repos": 73,
+  "CORE": 25,
+  "EXTENDED": 23,
+  "ARCHIVE": 25,
+  "core_image": 12,
+  "core_video": 13,
+  "compile_errors": [],
+  "v1_selftest": "SELFTEST PASS",
+  "v2_selftest": "V2 SELFTEST PASS",
+  "serum_generator": "Generated: /mnt/data/content_script_collector_v2/outputs/세럼_script_v2.md",
+  "v1_returncode": 0,
+  "v2_returncode": 0
+}

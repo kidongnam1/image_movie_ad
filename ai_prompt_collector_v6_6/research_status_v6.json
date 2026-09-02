@@ -1,0 +1,29 @@
+{
+  "version": "6.0",
+  "manifest_total": 93,
+  "active_total": 73,
+  "active_corpus": 63,
+  "active_tooling": 10,
+  "watchlist_rows": 20,
+  "duplicate_excluded": 1,
+  "origin_status_counts": {
+    "probable_original": 58,
+    "verified_original": 15,
+    "candidate": 19,
+    "duplicate_excluded": 1
+  },
+  "media_counts_all": {
+    "image": 53,
+    "video": 40
+  },
+  "media_counts_active": {
+    "image": 39,
+    "video": 34
+  },
+  "source_kind_counts": {
+    "corpus": 63,
+    "watchlist": 14,
+    "tooling": 16
+  },
+  "model_families": 36
+}

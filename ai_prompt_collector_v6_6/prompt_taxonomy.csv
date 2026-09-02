@@ -1,0 +1,25 @@
+tag,media,meaning,example_terms
+product,both,Product photography or product-focused visuals,product|packshot|bottle|packaging
+advertising,both,Commercial advertising and campaign creative,advertising|campaign|commercial
+portrait,image,Portrait or headshot imagery,portrait|headshot|face
+fashion,image,Fashion/editorial/outfit imagery,fashion|editorial|streetwear
+food,image,Food and beverage visuals,food|restaurant|coffee|dessert
+architecture,image,Exterior architecture and real estate,architecture|building|property
+interior,image,Interior spaces and furniture,interior|bedroom|kitchen
+poster,image,Poster/key visual/flyer design,poster|billboard|flyer
+typography,image,Typography/lettering/wordmark tasks,typography|font|wordmark
+infographic,image,Information design and explanatory graphics,infographic|diagram|chart
+ui_ux,image,UI/UX mockups and interfaces,ui|ux|dashboard|app screen
+social_media,both,Social media oriented creative,instagram|tiktok|reels|thumbnail
+ugc,video,Creator-style UGC and testimonial video,ugc|creator-style|testimonial
+cinematic,both,Cinematic film-like visual language,cinematic|film|anamorphic
+storyboard,video,Shot sequences and storyboard planning,storyboard|shot list|sequence
+camera_motion,video,Explicit camera movement,dolly|pan|tilt|orbit|tracking
+dialogue_audio,video,Dialogue voiceover sound or lip sync,dialogue|audio|voiceover|lip sync
+image_to_video,video,Image-to-video workflows,image-to-video|i2v|reference image
+editing,image,Image editing or constrained modification,change only|preserve|inpaint
+logo_brand,image,Logos wordmarks and brand systems,logo|wordmark|brand identity
+science_technical,image,Scientific or engineering explanation visuals,scientific|schematic|engineering
+photorealistic,image,Photorealistic photography style,photorealistic|realistic photography
+3d,image,3D/CGI rendering,3d render|cgi|blender|unreal engine
+anime,image,Anime or manga style,anime|manga

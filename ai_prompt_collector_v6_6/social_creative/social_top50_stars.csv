@@ -1,0 +1,51 @@
+﻿repo,category,sns_directness_score,capability,sns_use_case,stars,fork,archived,license_spdx,language,updated_at,pushed_at,metadata_status,stars_rank,recommended_score,recommended_rank
+AUTOMATIC1111/stable-diffusion-webui,ai_image_engine,75,"Stable Diffusion generation, img2img, extensions, upscaling","AI thumbnail, product image, social creative",164765,False,False,AGPL-3.0,Python,2026-09-02T01:13:08Z,2026-03-02T07:00:53Z,ok,1,87.75,4
+Comfy-Org/ComfyUI,ai_image_engine,82,Node-based generative AI workflow engine,"AI thumbnail, batch social creative, reproducible workflows",131085,False,False,GPL-3.0,Python,2026-09-02T02:42:36Z,2026-09-02T02:43:30Z,ok,2,90.74,1
+opencv/opencv,image_processing,58,Computer vision and image processing library,"Cropping, filters, compositing pipeline foundation",90683,False,False,Apache-2.0,C++,2026-09-02T02:49:22Z,2026-09-01T11:26:36Z,ok,3,77.51,22
+ultralytics/ultralytics,vision_ai,72,Object detection/segmentation/tracking,Auto subject detection and smart thumbnail crops,61174,False,False,AGPL-3.0,Python,2026-09-02T02:30:02Z,2026-09-01T23:39:03Z,ok,4,85.7,9
+penpot/penpot,design_engine,79,Open source design platform,Reusable social templates and layouts,59469,False,False,MPL-2.0,Clojure,2026-09-02T01:21:40Z,2026-09-01T21:10:26Z,ok,5,81.36,14
+remotion-dev/remotion,programmatic_video,92,Programmatic video generation with React,"Short product ads, Reels, Shorts, motion thumbnails",58030,False,False,NOASSERTION,TypeScript,2026-09-02T02:41:09Z,2026-09-01T19:59:31Z,ok,6,89.53,3
+facebookresearch/segment-anything,segmentation_ai,78,Foundation segmentation model,Automatic subject cutouts for social thumbnails,54784,False,False,Apache-2.0,Jupyter Notebook,2026-09-02T02:30:30Z,2024-09-18T17:46:55Z,ok,7,81.83,13
+lllyasviel/Fooocus,ai_image_engine,86,Simplified high-quality image generation UI,Fast AI thumbnail and social image generation,52664,False,False,GPL-3.0,Python,2026-09-02T02:40:49Z,2025-12-01T19:17:07Z,ok,8,86.7,6
+TencentARC/GFPGAN,face_restoration_ai,74,Face restoration,Creator thumbnail face cleanup,37664,False,False,NOASSERTION,Python,2026-09-01T13:32:32Z,2024-07-26T18:44:02Z,ok,9,72.59,38
+xinntao/Real-ESRGAN,upscaling_ai,88,Real-world image super-resolution,Upscale low-res creative assets,36661,False,False,BSD-3-Clause,Python,2026-09-01T20:08:30Z,2024-08-06T13:15:18Z,ok,10,81.0,16
+huggingface/diffusers,ai_image_engine,68,Diffusion pipelines and model toolkit,"Custom AI creative pipeline, product/social generation",34419,False,False,Apache-2.0,Python,2026-09-02T01:41:45Z,2026-09-02T02:33:15Z,ok,11,82.79,11
+lllyasviel/ControlNet,ai_control,72,Structural control for diffusion generation,Pose/layout-controlled social creative,34103,False,False,Apache-2.0,Python,2026-09-02T01:04:29Z,2024-02-25T09:49:39Z,ok,12,76.75,23
+lovell/sharp,image_processing,82,High-performance Node image processing,"Resize, composite, text/image pipeline",32624,False,False,Apache-2.0,JavaScript,2026-09-01T15:02:26Z,2026-08-30T10:43:41Z,ok,13,80.11,17
+fabricjs/fabric.js,canvas_engine,84,Canvas object model and rendering,Template-based social card generator,31418,False,False,MIT,TypeScript,2026-09-01T13:34:59Z,2026-08-18T17:25:50Z,ok,14,82.48,12
+invoke-ai/InvokeAI,ai_image_engine,84,Professional generative image canvas and workflows,"Thumbnail, ads, inpainting, product creative",28107,False,False,Apache-2.0,Python,2026-09-02T02:00:51Z,2026-09-01T00:42:16Z,ok,15,86.11,7
+danielgatis/rembg,background_removal_ai,93,Background removal tool,Product cutouts and thumbnail assets,24579,False,False,MIT,Python,2026-09-02T00:45:13Z,2026-08-18T23:41:55Z,ok,16,89.91,2
+facebookresearch/sam2,segmentation_ai,82,Segment Anything for images and video,Product/person cutouts and video asset extraction,19788,False,False,Apache-2.0,Jupyter Notebook,2026-09-01T17:29:30Z,2026-05-30T02:29:40Z,ok,17,84.44,10
+sczhou/CodeFormer,face_restoration_ai,75,Face restoration,Creator/UGC thumbnail enhancement,18122,False,False,NOASSERTION,Python,2026-09-01T20:41:05Z,2025-11-18T12:03:30Z,ok,18,75.4,30
+Mikubill/sd-webui-controlnet,ai_control,78,ControlNet extension for A1111,Layout/pose control for thumbnails,17841,False,False,GPL-3.0,Python,2026-09-02T02:30:43Z,2024-08-12T13:06:00Z,ok,19,76.1,26
+ffmpegwasm/ffmpeg.wasm,video_processing,70,FFmpeg for browser,Video frame extraction and social asset processing,17770,False,False,MIT,C,2026-09-01T13:41:26Z,2026-02-01T08:35:30Z,ok,20,73.08,36
+ImageMagick/ImageMagick,image_processing,62,General image manipulation toolkit,"Batch banners, composites, text overlays",17290,False,False,NOASSERTION,C,2026-09-02T01:47:20Z,2026-09-01T23:51:50Z,ok,21,67.99,45
+konvajs/konva,canvas_engine,84,2D canvas framework,Interactive thumbnail/banner editor,14737,False,False,NOASSERTION,TypeScript,2026-09-02T02:27:30Z,2026-08-26T22:58:21Z,ok,22,74.96,32
+jimp-dev/jimp,image_processing,76,JavaScript image processing,"Simple compositing, resizing, overlays",14667,False,False,MIT,TypeScript,2026-09-01T15:10:50Z,2026-04-07T17:55:29Z,ok,23,75.95,27
+vercel/satori,social_render_engine,96,HTML/CSS to SVG renderer for OG images,"Open Graph, social card, thumbnail generation",13894,False,False,MPL-2.0,TypeScript,2026-09-01T22:59:48Z,2026-08-24T12:48:10Z,ok,24,86.77,5
+python-pillow/Pillow,image_processing,65,Python Imaging Library fork,Programmatic social image generation,13794,False,False,NOASSERTION,Python,2026-09-01T21:51:48Z,2026-09-01T13:40:06Z,ok,25,67.99,46
+lllyasviel/stable-diffusion-webui-forge,ai_image_engine,83,Optimized Stable Diffusion WebUI,Fast AI creative generation,12983,False,False,AGPL-3.0,Python,2026-09-01T23:34:08Z,2025-07-31T01:33:17Z,ok,26,78.29,21
+InstantID/InstantID,identity_image_ai,84,Identity-preserving generation,"Creator thumbnails, consistent faces",11990,False,False,Apache-2.0,Python,2026-09-01T15:12:05Z,2024-07-18T04:12:48Z,ok,27,76.27,25
+ostris/ai-toolkit,ai_training,67,Training and fine-tuning toolkit,Brand/product LoRA workflows,11873,False,False,MIT,Python,2026-09-02T01:16:32Z,2026-08-31T21:54:01Z,ok,28,78.99,20
+imgproxy/imgproxy,image_processing,72,Fast image resizing and processing server,Dynamic social variants and aspect ratios,11040,False,False,Apache-2.0,Go,2026-09-01T15:12:32Z,2026-08-31T15:16:15Z,ok,29,74.0,33
+Lightricks/LTX-Video,ai_video_engine,78,Open video generation model/tooling,Short social ad and motion creative generation,10922,False,False,Apache-2.0,Python,2026-09-01T15:35:32Z,2026-01-05T22:37:07Z,ok,30,79.46,19
+Automattic/node-canvas,canvas_engine,78,Canvas implementation for Node.js,Server-side social image rendering,10691,False,False,UNKNOWN,JavaScript,2026-09-01T15:12:45Z,2026-08-24T16:00:31Z,ok,31,72.39,39
+Acly/krita-ai-diffusion,design_ai,88,Generative AI integration in Krita,Editable social creatives and product assets,10532,False,False,GPL-3.0,Python,2026-09-01T15:12:52Z,2026-08-28T20:55:10Z,ok,32,85.84,8
+IDEA-Research/GroundingDINO,vision_ai,74,Open-set object detection,Find products/people for automated compositions,10530,False,False,Apache-2.0,Python,2026-09-01T15:12:52Z,2024-08-12T08:52:02Z,ok,33,73.34,34
+thumbor/thumbor,image_processing,70,Smart imaging service,"Dynamic crops, thumbnails, transformations",10515,False,False,MIT,Python,2026-09-01T15:12:53Z,2026-09-01T20:31:19Z,ok,34,73.34,35
+easydiffusion/easydiffusion,ai_image_engine,78,Easy local Stable Diffusion UI,Quick thumbnails and promotional visuals,10455,False,False,NOASSERTION,JavaScript,2026-09-02T02:37:17Z,2026-08-27T08:44:40Z,ok,35,76.32,24
+TencentARC/PhotoMaker,identity_image_ai,82,Personalized photo generation,Creator/UGC thumbnail portraits,10087,False,False,NOASSERTION,Jupyter Notebook,2026-09-01T05:05:56Z,2024-10-31T09:35:15Z,ok,36,72.2,40
+nhn/tui.image-editor,image_editor,82,Browser image editor,Manual/templated thumbnail editing,7673,False,False,MIT,JavaScript,2026-09-01T13:14:38Z,2023-11-20T10:48:41Z,ok,37,70.29,42
+imgly/background-removal-js,background_removal_ai,94,Browser background removal,Product cutouts for social creatives,7296,False,False,AGPL-3.0,TypeScript,2026-09-02T01:58:38Z,2025-07-18T12:56:39Z,ok,38,81.12,15
+cubiq/ComfyUI_IPAdapter_plus,ai_control,82,Reference-image control nodes for ComfyUI,Brand/product reference consistency,6122,False,False,GPL-3.0,Python,2026-09-01T18:31:37Z,2025-04-14T07:29:17Z,ok,39,75.54,29
+disintegration/imaging,image_processing,72,Go imaging package,Programmatic thumbnail composition,5756,False,False,MIT,Go,2026-09-02T00:44:26Z,2023-09-21T02:16:10Z,ok,40,64.83,49
+coobird/thumbnailator,thumbnail_processing,72,Java thumbnail library,Thumbnail resizing/composition backend,5427,False,False,MIT,Java,2026-08-31T23:07:49Z,2026-02-17T17:48:42Z,ok,41,75.64,28
+mcmonkeyprojects/SwarmUI,ai_image_engine,82,Multi-backend generative AI UI,"Batch thumbnails, image workflows",4524,False,False,MIT,C#,2026-09-01T23:17:23Z,2026-09-01T23:17:19Z,ok,42,79.53,18
+cshum/imagor,image_processing,80,Fast image processing server,Dynamic thumbnails and social variants,4015,False,False,Apache-2.0,Go,2026-09-01T16:21:46Z,2026-08-31T08:25:41Z,ok,43,72.63,37
+h2non/bimg,image_processing,68,Go bindings for libvips,High-volume social image processing,3029,False,False,MIT,Go,2026-08-28T23:58:34Z,2025-01-23T09:51:09Z,ok,44,63.69,51
+yisibl/resvg-js,render_engine,74,SVG renderer for Node.js,SVG social card rendering,1982,False,False,MPL-2.0,TypeScript,2026-09-01T14:11:41Z,2026-06-30T20:34:55Z,ok,45,68.78,44
+muesli/smartcrop,smart_crop,88,Smart image cropping,Subject-aware thumbnail crops,1855,False,False,MIT,Go,2026-08-24T01:14:50Z,2023-07-06T12:16:16Z,ok,46,65.06,48
+TencentARC/BrushNet,image_editing_ai,72,Image inpainting/editing model,Selective creative editing,1744,False,False,NOASSERTION,Python,2026-08-30T05:00:21Z,2024-12-17T13:49:54Z,ok,47,63.86,50
+kvnang/workers-og,social_card_generator,95,Cloudflare Workers OG image generation,Serverless social/OG cards,356,False,False,MIT,TypeScript,2026-08-29T20:22:26Z,2025-06-12T00:34:59Z,ok,48,71.32,41
+simonhamp/the-og,social_card_generator,93,Open Graph image generator,Direct social sharing graphics,307,False,False,MIT,PHP,2026-08-03T23:49:13Z,2026-05-16T08:10:43Z,ok,49,75.33,31
+yznts/oxigen,social_card_generator,94,Open Graph image generator,Direct OG/social images,132,False,False,UNKNOWN,HTML,2026-02-18T01:41:35Z,2024-05-28T06:40:59Z,ok,50,60.78,52

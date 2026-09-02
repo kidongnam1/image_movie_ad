@@ -1,0 +1,146 @@
+{
+  "gpt_image_2": {
+    "media": "image",
+    "structure": "natural language + layout/text constraints + materials/lighting",
+    "strong_at": "instruction following, editing, text/layout, product/design",
+    "hint": "State subject, composition, exact text/layout, materials, lighting, camera, and what must remain unchanged."
+  },
+  "gpt4o_gpt_image_1": {
+    "media": "image",
+    "structure": "descriptive natural language + visual intent",
+    "strong_at": "conceptual image generation, styles, visual examples",
+    "hint": "Describe the full scene and desired visual intent; preserve source attribution when adapting examples."
+  },
+  "midjourney": {
+    "media": "image",
+    "structure": "concise visual phrase + style + composition + parameters",
+    "strong_at": "aesthetics, fashion, editorial, concept art",
+    "hint": "Use concise visual descriptors; add aspect ratio and stylization parameters only when relevant."
+  },
+  "flux": {
+    "media": "image",
+    "structure": "subject + composition + photographic/art detail + light/material",
+    "strong_at": "photorealism, texture, structured visual detail",
+    "hint": "Prioritize clear subject, spatial relationships, materials, lighting and camera language."
+  },
+  "nano_banana": {
+    "media": "image",
+    "structure": "scene + subject + environment + light + camera/lens + edit constraints",
+    "strong_at": "natural-language editing, product/realistic imagery",
+    "hint": "Be explicit about what changes and what stays fixed; specify angle, lens and lighting."
+  },
+  "seedream": {
+    "media": "image",
+    "structure": "subject + style + layout + commercial design/text",
+    "strong_at": "commercial visuals, posters, design-heavy images",
+    "hint": "Specify layout hierarchy, key text, brand mood, subject and visual style."
+  },
+  "stable_diffusion": {
+    "media": "image",
+    "structure": "positive prompt + optional negative prompt + model/sampler context",
+    "strong_at": "custom workflows, reproducibility, local control",
+    "hint": "Keep positive and negative concepts separable and preserve model-specific parameters outside the semantic prompt."
+  },
+  "ideogram": {
+    "media": "image",
+    "structure": "subject + composition + explicit typography/text + design style",
+    "strong_at": "typography, posters, logos, UI/product mockups",
+    "hint": "Quote exact text, state placement/hierarchy, then describe design style, subject and composition."
+  },
+  "seedance": {
+    "media": "video",
+    "structure": "shot sequence + subject action + camera movement + timing/transitions",
+    "strong_at": "cinematic sequence, ads, UGC, multi-shot motion",
+    "hint": "Write the temporal sequence explicitly and separate subject motion from camera motion."
+  },
+  "veo": {
+    "media": "video",
+    "structure": "shot + camera + action + environment + cinematic treatment + audio if needed",
+    "strong_at": "cinematic scene direction and audiovisual prompting",
+    "hint": "Define shot type, camera behavior, action, environment and optional dialogue/audio."
+  },
+  "kling": {
+    "media": "video",
+    "structure": "start state + action/physics + camera + end state",
+    "strong_at": "motion realism, physical transitions",
+    "hint": "Describe motion mechanics and end state clearly; avoid conflicting movement instructions."
+  },
+  "runway": {
+    "media": "video",
+    "structure": "subject motion + camera motion + scene motion",
+    "strong_at": "image-to-video motion direction",
+    "hint": "If an input image already defines appearance, spend text budget on motion and camera behavior."
+  },
+  "sora": {
+    "media": "video",
+    "structure": "scene progression + action + camera + cinematic detail",
+    "strong_at": "coherent scene development and cinematic direction",
+    "hint": "Describe how the scene evolves over time, not just a static frame."
+  },
+  "hailuo": {
+    "media": "video",
+    "structure": "subject/action + camera + motion intensity + scene",
+    "strong_at": "dynamic short video",
+    "hint": "Use explicit action verbs, camera movement and motion intensity."
+  },
+  "wan": {
+    "media": "video",
+    "structure": "subject + action + camera + scene + temporal transition",
+    "strong_at": "general text/image-to-video workflows",
+    "hint": "Keep motion, scene and camera instructions distinct."
+  },
+  "luma": {
+    "media": "video",
+    "structure": "scene + subject motion + camera path",
+    "strong_at": "dreamlike/cinematic motion",
+    "hint": "Describe the camera path and one dominant subject motion."
+  },
+  "pika": {
+    "media": "video",
+    "structure": "subject transformation/motion + camera + effect",
+    "strong_at": "short transformations and effects",
+    "hint": "Keep the central transformation/effect explicit and concise."
+  },
+  "qwen_image_3": {
+    "media": "image",
+    "structure": "deliverable/use-case + goal + scene/subject + style + composition + exact text/data + constraints",
+    "strong_at": "text-heavy layouts, multilingual typography, e-commerce, infographics, consistent series",
+    "hint": "Define the deliverable first, quote exact on-image copy, state hierarchy and constraints, and separate facts from visual style."
+  },
+  "z_image": {
+    "media": "image",
+    "structure": "subject + visual style + composition + lighting + material/camera",
+    "strong_at": "fast image generation and editing workflows",
+    "hint": "Keep subject and composition explicit; use precise material, lighting and edit-preservation language."
+  },
+  "ltx_video": {
+    "media": "video",
+    "structure": "shot/scene + subject action + camera movement + temporal beats + dialogue/audio + settings",
+    "strong_at": "reproducible video prompts, camera movement, product video, dialogue and synchronized audio",
+    "hint": "Describe one temporal sequence at a time, keep camera motion separate from subject motion, and preserve generation settings/provenance."
+  },
+  "cogvideox": {
+    "media": "video",
+    "structure": "scene + action + temporal progression + camera + style",
+    "strong_at": "open video workflows and prompt-engineered text-to-video",
+    "hint": "Use concrete action verbs, temporal ordering and camera direction; avoid static image-only wording."
+  },
+  "hunyuan_video": {
+    "media": "video",
+    "structure": "scene + subject motion + camera + style + temporal consistency",
+    "strong_at": "open video generation and stylized motion workflows",
+    "hint": "Specify continuous motion, camera behavior and visual style without contradictory actions."
+  },
+  "higgsfield": {
+    "media": "video",
+    "structure": "creative intent + shot design + camera/motion control + character consistency + temporal beat + edit/extend constraints",
+    "strong_at": "cinematic ads, camera moves, character consistency, Seedance/Kling workflows",
+    "hint": "State the cinematic objective first, then camera/motion behavior, identity consistency, timing, and edit/extend constraints. Avoid mixing incompatible camera moves."
+  },
+  "mochi_video": {
+    "media": "video",
+    "structure": "scene + action + camera + visual mood + duration-aware progression",
+    "strong_at": "open text-to-video experiments",
+    "hint": "Favor a coherent single scene with explicit action and camera movement."
+  }
+}

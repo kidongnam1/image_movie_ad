@@ -1,0 +1,6 @@
+﻿repo,category,sns_directness_score,capability,sns_use_case,stars,fork,archived,license_spdx,language,updated_at,pushed_at,metadata_status,stars_rank,recommended_score,recommended_rank
+AUTOMATIC1111/stable-diffusion-webui,ai_image_engine,75,"Stable Diffusion generation, img2img, extensions, upscaling","AI thumbnail, product image, social creative",164765,False,False,AGPL-3.0,Python,2026-09-01T22:27:24Z,2026-03-02T07:00:53Z,verified_spotcheck,,,
+Comfy-Org/ComfyUI,ai_image_engine,82,Node-based generative AI workflow engine,"AI thumbnail, batch social creative, reproducible workflows",131070,False,False,GPL-3.0,Python,2026-09-01T23:19:06Z,2026-09-01T23:09:43Z,verified_spotcheck,,,
+remotion-dev/remotion,programmatic_video,92,Programmatic video generation with React,"Short product ads, Reels, Shorts, motion thumbnails",58012,False,False,NOASSERTION,TypeScript,2026-09-01T23:03:06Z,2026-09-01T19:59:31Z,verified_spotcheck,,,
+vercel/satori,social_render_engine,96,HTML/CSS to SVG renderer for OG images,"Open Graph, social card, thumbnail generation",13891,False,False,MPL-2.0,TypeScript,2026-09-01T13:17:54Z,2026-08-24T12:48:10Z,verified_spotcheck,,,
+simonhamp/the-og,social_card_generator,93,Open Graph image generator,Direct social sharing graphics,307,False,False,MIT,PHP,2026-08-03T23:49:13Z,2026-05-16T08:10:43Z,verified_spotcheck,,,

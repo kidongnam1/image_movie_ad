@@ -1,0 +1,27 @@
+AI Prompt Collector v6 - Search / recommendation examples
+
+1) Direct search
+python search_prompts.py "luxury perfume" --db AI_PROMPT_LIBRARY/indexes/prompt_library.sqlite
+
+2) Ranked image recommendations
+python recommend_prompts.py "premium product photography" --media image --use-case product --min-quality 70
+
+3) Ranked video recommendations for LTX
+python recommend_prompts.py "cinematic product video" --media video --model ltx --min-quality 65
+
+4) UGC video
+python recommend_prompts.py "creator testimonial product demo" --media video --tag ugc
+
+5) Camera motion
+python recommend_prompts.py "slow cinematic reveal" --media video --tag camera_motion
+
+6) Model prompt structure guide
+python optimize_prompt.py gpt_image_2 "luxury watch on black marble" --use-case advertising
+python optimize_prompt.py midjourney "editorial fashion portrait" --use-case fashion
+python optimize_prompt.py seedance "coffee product commercial" --use-case product_video
+python optimize_prompt.py kling "car driving through rain" --use-case cinematic
+python optimize_prompt.py ltx_video "perfume bottle reveal" --use-case product_video
+
+7) Search repository catalog before downloading
+python search_repos.py "product photography"
+python search_repos.py "video" --model seedance

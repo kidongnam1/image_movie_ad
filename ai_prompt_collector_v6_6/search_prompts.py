@@ -1,0 +1,36 @@
+import argparse, sqlite3
+ap=argparse.ArgumentParser(description='Search local AI prompt library v4')
+ap.add_argument('query',nargs='?',default='*')
+ap.add_argument('--db',default='AI_PROMPT_LIBRARY/indexes/prompt_library.sqlite')
+ap.add_argument('--media',choices=['image','video'])
+ap.add_argument('--model')
+ap.add_argument('--use-case',dest='use_case')
+ap.add_argument('--specialization')
+ap.add_argument('--tag')
+ap.add_argument('--source-kind',choices=['corpus','tooling','watchlist'])
+ap.add_argument('--origin-status')
+ap.add_argument('--min-quality',type=int,default=0,help='Minimum combined score')
+ap.add_argument('--min-model-fit',type=int,default=0)
+ap.add_argument('--tier',choices=['S','A','B','C','D'])
+ap.add_argument('--limit',type=int,default=20)
+a=ap.parse_args(); con=sqlite3.connect(a.db); con.row_factory=sqlite3.Row; cur=con.cursor()
+where=['p.combined_score>=?','p.model_fit_score>=?']; params=[a.min_quality,a.min_model_fit]
+if a.media: where.append('p.media_type=?'); params.append(a.media)
+if a.model: where.append('(p.model_family LIKE ? OR p.model_guess LIKE ?)'); params += [f'%{a.model}%',f'%{a.model}%']
+if a.tier: where.append('p.quality_tier=?'); params.append(a.tier)
+if a.use_case: where.append('p.use_case LIKE ?'); params.append(f'%{a.use_case}%')
+if a.specialization: where.append('p.specialization LIKE ?'); params.append(f'%{a.specialization}%')
+if a.tag: where.append('p.auto_tags LIKE ?'); params.append(f'%{a.tag}%')
+if a.source_kind: where.append('p.source_kind=?'); params.append(a.source_kind)
+if a.origin_status: where.append('p.origin_status=?'); params.append(a.origin_status)
+base=' AND '.join(where)
+try:
+    if a.query!='*': rows=cur.execute('SELECT p.* FROM prompts_fts f JOIN prompts p ON p.id=f.rowid WHERE prompts_fts MATCH ? AND '+base+' ORDER BY p.combined_score DESC,p.model_fit_score DESC LIMIT ?',[a.query]+params+[a.limit]).fetchall()
+    else: rows=cur.execute('SELECT p.* FROM prompts p WHERE '+base+' ORDER BY p.combined_score DESC,p.model_fit_score DESC LIMIT ?',params+[a.limit]).fetchall()
+except sqlite3.OperationalError:
+    q=f'%{a.query}%'; rows=cur.execute('SELECT * FROM prompts p WHERE (p.title LIKE ? OR p.prompt LIKE ? OR p.auto_tags LIKE ?) AND '+base+' ORDER BY p.combined_score DESC LIMIT ?',[q,q,q]+params+[a.limit]).fetchall()
+for i,r in enumerate(rows,1):
+    print(f'\n[{i}] SCORE={r["combined_score"]} / FIT={r["model_fit_score"]} / Q={r["prompt_quality_score"]} {r["quality_tier"]} | {r["media_type"]} | {r["model_family"]} | {r["repo"]}')
+    print('TAGS:',r['auto_tags'] or '-', '| USE_CASE:',r['use_case'] or '-', '| SPECIALIZATION:',r['specialization'] or '-', '| SOURCE:',r['source_kind'] or '-')
+    print('TITLE:',(r['title'] or '')[:200]); print('PROMPT:',(r['prompt'] or '')[:1600])
+con.close()

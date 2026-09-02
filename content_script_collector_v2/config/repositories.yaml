@@ -1,0 +1,126 @@
+version: 1
+updated_at: '2026-09-02'
+repositories:
+- id: marketingskills
+  repo: coreyhaines31/marketingskills
+  url: https://github.com/coreyhaines31/marketingskills
+  priority: P0
+  license_expected: MIT
+  usage_class: COMMERCIAL_OK
+  collect:
+  - README.md
+  - LICENSE
+  - VERSIONS.md
+  - skills/social/**
+  - skills/ad-creative/**
+  - skills/marketing-psychology/**
+  - skills/copywriting/**
+  - skills/video/**
+  maps_to:
+  - viral_hook
+  - short_form_script
+  - cta
+  - product_demo
+- id: vyralcontent
+  repo: vyralcontent/content-skills
+  url: https://github.com/vyralcontent/content-skills
+  priority: P0
+  license_expected: MIT
+  usage_class: COMMERCIAL_OK
+  collect:
+  - README.md
+  - LICENSE
+  - skills/viral-short-form/**
+  - skills/viral-hooks/**
+  - skills/viral-captions-and-ctas/**
+  maps_to:
+  - viral_hook
+  - short_form_script
+  - cta
+  - before_after
+  - product_demo
+  - testimonial
+- id: viral_hooks_skill
+  repo: rediumvex/viral-hooks-skill
+  url: https://github.com/rediumvex/viral-hooks-skill
+  priority: P0
+  license_expected: MIT
+  usage_class: COMMERCIAL_OK
+  collect:
+  - README.md
+  - LICENSE
+  - SKILL.md
+  - hooks-database.md
+  maps_to:
+  - viral_hook
+- id: social_media_skills
+  repo: social-media-skills/skills
+  url: https://github.com/social-media-skills/skills
+  priority: P0
+  license_expected: MIT
+  usage_class: COMMERCIAL_OK
+  collect:
+  - LICENSE
+  - skills/short-form-video-script/**
+  - skills/hook-writer/**
+  - skills/reels-script/**
+  - skills/tiktok-script/**
+  - skills/youtube-shorts/**
+  - skills/before-after-and-transformation/**
+  - skills/social-proof-and-testimonials/**
+  maps_to:
+  - viral_hook
+  - short_form_script
+  - before_after
+  - testimonial
+- id: ootto_content
+  repo: Ootto-AI/claude-content-skills
+  url: https://github.com/Ootto-AI/claude-content-skills
+  priority: P1
+  license_expected: MIT
+  usage_class: COMMERCIAL_OK
+  collect:
+  - LICENSE
+  - skills/reel-scripter/**
+  - skills/caption-and-hashtags/**
+  maps_to:
+  - short_form_script
+  - cta
+- id: advibly_ugc
+  repo: Advibly/skills
+  url: https://github.com/Advibly/skills
+  priority: P1
+  license_expected: UNKNOWN
+  usage_class: TRANSFORM_ONLY
+  collect:
+  - README.md
+  - LICENSE*
+  - ugc-ads/**
+  - skills/ugc-ads/**
+  - '**/ugc-ads/**'
+  maps_to:
+  - viral_hook
+  - short_form_script
+  - cta
+  - before_after
+  - product_demo
+  - testimonial
+  notes: Replacement for unavailable clipcurator repo. Public/non-archived verified
+    2026-09-02. UGC ad skill covers testimonial, unboxing, lifestyle demo, problem-solution,
+    and 5-shot direct-response scripting. Keep TRANSFORM_ONLY until license is explicitly
+    verified.
+- id: tiktok_viral_hooks
+  repo: shixinzhang/tiktok-viral-hooks
+  url: https://github.com/shixinzhang/tiktok-viral-hooks
+  priority: P1
+  license_expected: MIXED
+  usage_class: RESEARCH_ONLY
+  collect:
+  - README.md
+  - LICENSE*
+  - by-pattern/**
+  - '**/*metadata*'
+  maps_to:
+  - viral_hook
+  notes: Code may be permissive, but repository content has been described as non-commercial/share-alike;
+    never copy source scripts into commercial output.
