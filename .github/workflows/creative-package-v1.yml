@@ -1,0 +1,24 @@
+name: Creative Package V1
+
+on:
+  push:
+    paths:
+      - 'content_script_collector_v2/**'
+      - '.github/workflows/creative-package-v1.yml'
+  pull_request:
+    paths:
+      - 'content_script_collector_v2/**'
+      - '.github/workflows/creative-package-v1.yml'
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run Creative Package V1 tests
+        run: python -m unittest discover -s content_script_collector_v2/tests -p 'test_creative_package_v1.py' -v
