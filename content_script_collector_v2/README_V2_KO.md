@@ -32,3 +32,47 @@
 ## 세럼 테스트
 `GENERATE_SCRIPT_V2.bat` 실행 후 `세럼` 입력.
 샘플 결과는 `outputs/세럼_script_v2.md`와 JSON에 이미 포함되어 있습니다.
+
+---
+
+# Creative Package V1
+
+Script Generator V2 위에 광고 제작 패키지 오케스트레이터를 추가했습니다.
+
+실행:
+
+```bat
+GENERATE_CREATIVE_PACKAGE_V1.bat
+```
+
+검증:
+
+```bat
+VERIFY_CREATIVE_PACKAGE_V1.bat
+```
+
+상품 1개 입력으로 아래 광고 3종을 동시에 만듭니다.
+
+- UGC 후기형
+- Product Demo 제품 시연형
+- Cinematic 브랜드형
+
+각 광고별 산출물:
+
+- `script.md`
+- `storyboard.md`
+- `shot_list.json`
+- `image_prompts.json`
+- `video_prompts.json`
+- `voiceover.txt`
+- `subtitles.srt`
+
+프로젝트 공통 산출물:
+
+- `project.json`
+- `strategy.md`
+- `creative_scores.json`
+- `compliance_report.json`
+- `manifest.json`
+
+상세 설명은 `CREATIVE_PACKAGE_V1_KO.md`를 참고하세요.
