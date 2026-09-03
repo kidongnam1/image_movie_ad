@@ -265,6 +265,7 @@ def build_learning_profile(category: str = "", db_path: str | Path | None = None
             "active": False, "reason": "no performance data", "total_rows": 0,
             "total_impressions": 0, "category": category, "baselines": {},
             "angle_adjustments": {a: 0.0 for a in ANGLE_NAMES}, "angle_details": {},
+            "hook_adjustments": {}, "creative_adjustments": {},
         }
     all_agg = _aggregate(all_rows)
     baseline = _metrics(all_agg)
@@ -285,14 +286,34 @@ def build_learning_profile(category: str = "", db_path: str | Path | None = None
             adj = global_adj * 0.5
             details[angle] = {"category": None, "global": global_detail, "category_blend": 0.0}
         adjustments[angle] = round(max(-6.0, min(6.0, adj)), 2)
+
+    def direct_adjustments(field: str, max_bonus: float) -> dict[str, float]:
+        grouped: dict[str, list[Any]] = {}
+        for row in all_rows:
+            key = str(row[field] or "").strip()
+            if key:
+                grouped.setdefault(key, []).append(row)
+        result: dict[str, float] = {}
+        for key, rows in grouped.items():
+            agg = _aggregate(rows)
+            if agg["impressions"] < 200:
+                result[key] = 0.0
+                continue
+            adj, _detail = _angle_adjustment(agg, baseline)
+            result[key] = round(max(-max_bonus, min(max_bonus, adj * (max_bonus / 6.0))), 2)
+        return result
+
+    hook_adjustments = direct_adjustments("hook_text", 3.0)
+    creative_adjustments = direct_adjustments("creative_id", 2.0)
     conn.close()
     return {
         "active": True, "reason": "performance data available", "category": category,
         "total_rows": int(all_agg["rows"]), "total_impressions": int(all_agg["impressions"]),
         "baselines": {k: round(v, 6) if isinstance(v, float) else v for k, v in baseline.items()},
         "angle_adjustments": adjustments, "angle_details": details,
+        "hook_adjustments": hook_adjustments, "creative_adjustments": creative_adjustments,
         "weights": {"retention_2s": .25, "retention_3s": .15, "ctr": .25, "purchase_cvr": .25, "roas": .10},
-        "max_adjustment": 6.0,
+        "max_adjustment": 6.0, "max_hook_adjustment": 3.0, "max_creative_adjustment": 2.0,
     }
 
 
