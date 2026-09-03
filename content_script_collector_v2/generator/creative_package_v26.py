@@ -85,12 +85,29 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     a = parse_args()
+    original_call_legacy = None
     try:
         if not a.product:
             raise ValueError("product is required")
         if a.performance_file:
             result = perf.import_file(a.performance_file, a.performance_db)
             print("PERFORMANCE_IMPORT=", result)
+
+        generated = generator.generate(
+            a.product,
+            category=a.category,
+            features=a.features,
+            must_emphasize=a.must_emphasize,
+            pain_point=a.pain_point,
+            target=a.target,
+            description=a.description,
+            intensity=a.intensity,
+            performance_db=a.performance_db,
+            experiment_min_impressions=a.experiment_min_impressions,
+        )
+        if a.require_db and not generated.get("db_integration", {}).get("connected"):
+            raise RuntimeError("Content DB is not connected or empty")
+
         config = core.build_project_config(
             product_name=a.product,
             product_description=a.description,
@@ -105,25 +122,22 @@ def main() -> int:
             pain_point=a.pain_point,
             intensity=a.intensity,
         )
+
+        # Feed the exact V2.6 learned result into all package variants so custom/default performance DBs behave identically.
+        original_call_legacy = core.call_legacy
+        core.call_legacy = lambda _config: generated
         project_dir = core.generate_package(config, a.outdir, require_db=a.require_db)
-        generated = generator.generate(
-            a.product,
-            category=a.category,
-            features=a.features,
-            must_emphasize=a.must_emphasize,
-            pain_point=a.pain_point,
-            target=a.target,
-            description=a.description,
-            intensity=a.intensity,
-            performance_db=a.performance_db,
-            experiment_min_impressions=a.experiment_min_impressions,
-        )
+        core.call_legacy = original_call_legacy
+        original_call_legacy = None
+
         augment_package(project_dir, generated)
         print("OUTPUT_DIR=", project_dir)
         print("SCRIPT_GENERATOR_VERSION=", generated.get("version"))
         print("EXPERIMENT_IDS=", [c["creative_id"] for c in generated["experiment_plan"]["candidates"]])
         return 0
     except Exception as exc:
+        if original_call_legacy is not None:
+            core.call_legacy = original_call_legacy
         tb = traceback.format_exc()
         print("ERROR:", exc)
         print(tb)
