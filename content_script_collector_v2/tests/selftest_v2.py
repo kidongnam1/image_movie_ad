@@ -6,6 +6,7 @@ sys.path.insert(0,str(ROOT))
 from generator.script_generator_v2 import generate
 
 beauty=generate("세럼")
+assert beauty["version"]=="2.6"
 assert len(beauty["hooks"])==30
 assert len(beauty["top3"])==3
 assert len(beauty["script_15s"])==5
@@ -14,6 +15,7 @@ assert len(beauty["script_45s"])==5
 assert all(len(beauty["video_prompts"][m])==5 for m in ("kling","veo","seedance"))
 assert beauty["product_analysis"]["category"]=="beauty"
 assert all(h["score"]>=80 for h in beauty["hooks"])
+assert len(beauty["experiment_plan"]["candidates"])==3
 
 golf=generate(
     "골프 거리측정기",
@@ -29,6 +31,7 @@ assert all(h["score"]>=80 for h in golf["hooks"])
 assert all("골프 거리측정기" in h["text"] for h in golf["top3"])
 assert "피부" not in " ".join(x["spoken"] for x in golf["script_30s"])
 assert "beauty" not in " ".join(golf["video_prompts"]["veo"]).lower()
+assert "performance_learning" in golf
 
 vacuum=generate(
     "무선 청소기",
@@ -39,5 +42,6 @@ assert vacuum["product_analysis"]["category"]=="home_appliance"
 assert vacuum["product_analysis"]["primary_selling_point"]=="18,000Pa 흡입력"
 assert "18,000Pa 흡입력" in vacuum["product_analysis"]["selling_points"]
 assert "피부" not in " ".join(x["spoken"] for x in vacuum["script_30s"])
+assert len(vacuum["experiment_plan"]["candidates"])==3
 
-print("V2.4 SELFTEST PASS")
+print("V2.6 SELFTEST PASS")

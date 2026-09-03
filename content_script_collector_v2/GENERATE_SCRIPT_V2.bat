@@ -4,7 +4,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ==========================================================
-echo Script Generator V2.5 - 강한 광고 대본 생성
+echo Script Generator V2.6 - 성과학습 광고 대본 생성
 echo ==========================================================
 echo.
 
@@ -17,20 +17,26 @@ set /p FEATURES=추가 특징 (예: 800m 측정, 150g 초경량 / 선택):
 set /p PAIN=고객이 겪는 불편/Pain Point (선택): 
 set /p TARGET=타깃 고객 (기본: 일반 소비자): 
 set /p INTENSITY=광고 강도 1~5 (기본: 4): 
+set /p PERF=성과 파일 CSV/JSON/XLSX 경로 (없으면 Enter): 
 
 if not defined TARGET set "TARGET=일반 소비자"
 if not defined INTENSITY set "INTENSITY=4"
 
 echo.
-echo [DB CHECK] Script Generator V2.5 + Content DB 실행...
-python generator\script_generator_v2.py "%PRODUCT%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --require-db
+echo [DB CHECK] Script Generator V2.6 + Content DB + Performance Learning 실행...
+if defined PERF (
+  python generator\script_generator_v2.py "%PRODUCT%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --performance-file "%PERF%" --require-db
+) else (
+  python generator\script_generator_v2.py "%PRODUCT%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --require-db
+)
 
 if errorlevel 1 goto FAIL
 
 echo.
-echo SUCCESS - Script Generator V2.5
+echo SUCCESS - Script Generator V2.6
 echo 결과 폴더: outputs
-echo JSON / Markdown에서 TOP3 Hook, Creative Competition, 15/30/45초 대본, 품질감사를 확인하세요.
+echo JSON / Markdown에서 TOP3 Hook, 성과보정, A/B/C 실험후보, 15/30/45초 대본을 확인하세요.
+echo 성과 DB: database\ad_performance.sqlite
 pause
 exit /b 0
 
