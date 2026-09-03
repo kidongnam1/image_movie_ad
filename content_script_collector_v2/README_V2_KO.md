@@ -10,23 +10,31 @@ V2.6 흐름:
 2. 사용자가 지정한 `반드시 강조할 Selling Point` 우선 반영
 3. 광고 강도 1~5 + V2.5 Strong Hook Gate
 4. Hook 30개 + Creative Competition
-5. 과거 실광고 성과가 있으면 Angle별 점수 자동 보정
+5. 과거 실광고 성과가 있으면 Angle/Hook/creative_id별 점수 자동 보정
 6. A/B/C 후보 3개와 `creative_id` 생성
 7. 15초 / 30초 / 45초 대본 + 영상 Prompt 생성
 8. 실제 광고 성과를 CSV/JSON/XLSX로 다시 입력
-9. 다음 생성부터 2초·3초 유지율 / CTR / 구매전환 / ROAS를 학습
+9. 다음 생성부터 2초·3초 유지율 / CTR / 상세페이지 유입 / 구매전환 / ROAS를 학습
 
 ## 성과학습에서 사용하는 지표
 
 | 지표 | 비중 |
 |---|---:|
-| 2초 유지율 | 25% |
-| 3초 유지율 | 15% |
+| 2초 유지율 | 20% |
+| 3초 유지율 | 10% |
 | CTR | 25% |
+| 상세페이지 유입률 | 10% |
 | 구매전환율 | 25% |
 | ROAS | 10% |
 
-성과 보정은 Angle별 **최대 ±6점**으로 제한합니다. 표본이 작으면 Bayesian shrinkage와 신뢰도 보정으로 영향이 거의 0에 가깝게 줄어듭니다.
+성과 보정은 다음처럼 제한합니다.
+
+- Angle: 최대 ±6점
+- 동일 Hook 문구: 최대 ±3점
+- 동일 `creative_id`: 최대 ±2점
+- 최종 합산 성과보정: 최대 ±8점
+
+표본이 작으면 Bayesian shrinkage와 신뢰도 보정으로 영향이 거의 0에 가깝게 줄어듭니다. 성과학습은 안전/품질 Gate를 우회하지 않고 Gate를 통과한 후보의 순위만 제한적으로 조정합니다.
 
 ## 성과 DB
 
@@ -35,7 +43,7 @@ V2.6 흐름:
 - Content 지식 DB: `database/content_script.sqlite`
 - 광고 성과 DB: `database/ad_performance.sqlite`
 
-성과 DB는 자동 생성되며 같은 행을 두 번 가져오면 fingerprint로 중복 저장하지 않습니다.
+성과 DB는 자동 생성되며 같은 행을 두 번 가져오면 SHA-256 fingerprint로 중복 저장하지 않습니다. 운영 DB 파일과 WAL/SHM 파일은 `.gitignore`에 포함되어 GitHub에 커밋되지 않습니다.
 
 ## 1. 성과 입력 템플릿 만들기
 
@@ -114,7 +122,7 @@ python generator\script_generator_v2.py "골프 거리측정기" ^
 
 성과 데이터가 아직 없으면 **Cold Start**로 V2.5 품질점수를 그대로 사용하고 A/B/C 트래픽은 34/33/33으로 제안합니다.
 
-충분한 성과 데이터가 있으면 성과가 높은 Angle을 제한적으로 올리고 낮은 Angle을 내리며 A/B/C 기본 배분은 40/30/30으로 제안합니다.
+누적 성과 노출이 5,000 이상이면 학습 점수를 활용하고 A/B/C 기본 배분은 40/30/30으로 제안합니다. 이 배분은 실제 광고 플랫폼에 자동 적용하지 않고 실험 계획으로만 저장합니다.
 
 ## 4. V2.6 주요 산출물
 
@@ -125,6 +133,8 @@ python generator\script_generator_v2.py "골프 거리측정기" ^
   - 누적 노출
   - 기준 지표
   - Angle별 성과 보정
+  - 동일 Hook 성과 보정
+  - 동일 `creative_id` 성과 보정
 - `experiment_plan`
   - A/B/C 후보
   - 고유 `creative_id`
@@ -141,6 +151,8 @@ A / CR-XXXXXXXXXXXX / 문제공격형 / 40%
 B / CR-XXXXXXXXXXXX / 호기심형   / 30%
 C / CR-XXXXXXXXXXXX / 손실회피형 / 30%
 ```
+
+`creative_id`는 상품 + 카테고리 + Angle + Hook을 기반으로 결정적으로 생성합니다. 실제 광고 이름이나 메모에 이 ID를 남긴 뒤 성과 파일의 `creative_id`에 다시 넣으면 동일 Creative 성과를 직접 학습할 수 있습니다.
 
 ## 5. Creative Package
 
@@ -168,13 +180,13 @@ A/B/C creative_id 생성
   ↓
 실제 광고 집행 (외부 플랫폼에서 사람이 승인/집행)
   ↓
-노출 / 2초 / 3초 / 클릭 / 구매 / 매출 / 광고비 수집
+노출 / 2초 / 3초 / 클릭 / 상세페이지 / 구매 / 매출 / 광고비 수집
   ↓
 IMPORT_AD_PERFORMANCE_V26.bat
   ↓
 ad_performance.sqlite 누적
   ↓
-다음 생성 시 Angle 점수 자동 보정
+다음 생성 시 Angle + Hook + Creative 점수 자동 보정
 ```
 
 프로그램은 **실제 광고 게시나 예산 지출을 자동 실행하지 않습니다.** 비용 발생 단계는 외부 플랫폼에서 별도 승인 후 실행해야 합니다.
@@ -194,7 +206,7 @@ V2.5의 다음 원칙을 그대로 유지합니다.
 - 근거 없는 1위·최고·100% 차단
 - 치료·완치 등 의료적 과장 차단
 
-성과가 좋았다는 이유만으로 위험 표현을 다시 허용하지 않습니다. **성과학습은 안전/품질 Gate를 통과한 후보의 순위만 제한적으로 조정합니다.**
+성과가 좋았다는 이유만으로 위험 표현을 다시 허용하지 않습니다.
 
 ## 8. 전체 검증
 
@@ -207,9 +219,11 @@ VERIFY_DB_GENERATOR.bat
 1. Python 구문검사
 2. V2.5 5상품 회귀테스트
 3. V2.6 성과 DB 중복/유효성/표본축소 테스트
-4. V2.6 성과 기반 재랭킹 + Cold Start 테스트
-5. 실제 Content DB 연동
-6. Hook 30개 / 강조점 Coverage / A/B/C 3개 확인
+4. V2.6 Angle/Hook/creative 성과 학습 테스트
+5. V2.6 성과 기반 재랭킹 + Cold Start 테스트
+6. Creative Package 성과학습 sidecar 테스트
+7. 실제 Content DB 연동
+8. Hook 30개 / 강조점 Coverage / A/B/C 3개 확인
 
 ## 광고 집행 전 주의
 
