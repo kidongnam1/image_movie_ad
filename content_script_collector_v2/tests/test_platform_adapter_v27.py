@@ -15,8 +15,8 @@ class PlatformAdapterV27Tests(unittest.TestCase):
         c=store.connect(db)
         data={"version":"2.7","product":"골프 거리측정기","product_analysis":{"category":"golf"},"experiment_plan":{"candidates":[{"creative_id":"CR-ABCDEF123456","angle":"problem_attack","angle_label":"문제공격형","hook":"아직도 거리 재느라 늦으세요?","selling_point":"0.2초 측정","slot":"A"}]}}
         registry.register_candidates(c,data);c.close()
-    def _write(self,path,headers,row):
-        with path.open("w",encoding="utf-8-sig",newline="") as f:
+    def _write(self,path,headers,row,encoding="utf-8-sig"):
+        with path.open("w",encoding=encoding,newline="") as f:
             w=csv.writer(f);w.writerow(headers);w.writerow(row)
     def test_four_platforms_auto_detect_and_registry_enrich(self):
         with tempfile.TemporaryDirectory() as td:
@@ -45,5 +45,15 @@ class PlatformAdapterV27Tests(unittest.TestCase):
             c=store.connect(db);r=c.execute("SELECT product,category FROM performance_events").fetchone();c.close()
             self.assertEqual(r["product"],"테스트 상품")
             self.assertEqual(r["category"],"general")
+    def test_utf8_bom_cp949_and_euckr_csv(self):
+        headers=["날짜","광고명","노출수","클릭수","매출액","광고비"]
+        row=["2026-09-04","한글 광고",1000,50,500000,100000]
+        with tempfile.TemporaryDirectory() as td:
+            td=Path(td)
+            for enc,name in (("utf-8-sig","utf8bom"),("cp949","cp949"),("euc-kr","euckr")):
+                p=td/f"{name}.csv";self._write(p,headers,row,encoding=enc)
+                rows=adapter.read_tabular(p)
+                self.assertEqual(rows[0]["광고명"],"한글 광고")
+                self.assertEqual(str(rows[0]["노출수"]),"1000")
 
 if __name__=="__main__":unittest.main()
