@@ -38,8 +38,8 @@ def register_candidates(conn: sqlite3.Connection, data: dict[str, Any], source_p
     ensure_registry(conn)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     candidates = data.get("experiment_plan", {}).get("candidates", [])
-    product = data.get("product", "")
-    category = data.get("product_analysis", {}).get("category", "")
+    product = str(data.get("product", "") or "").strip()
+    category = str(data.get("product_analysis", {}).get("category", "") or "").strip()
     version = str(data.get("version", "2.7"))
     n = 0
     for c in candidates:
@@ -70,12 +70,28 @@ def list_registry(conn: sqlite3.Connection) -> list[dict[str, Any]]:
     ensure_registry(conn)
     return [dict(r) for r in conn.execute("SELECT * FROM creative_registry ORDER BY registered_at DESC, creative_id")]
 
+def _sibling_project(path: Path) -> dict[str, Any]:
+    p = path.parent / "project.json"
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8-sig"))
+    except Exception:
+        return {}
+
 def register_file(plan_path: str | Path, db_path: str | Path) -> dict[str, Any]:
-    path=Path(plan_path); data=json.loads(path.read_text(encoding="utf-8-sig"))
-    if "experiment_plan" not in data:
-        data={"version":data.get("version","2.7"),"product":data.get("product",data.get("product_name","")),"product_analysis":data.get("product_analysis",{}),"experiment_plan":data}
+    path=Path(plan_path); raw=json.loads(path.read_text(encoding="utf-8-sig")); sibling=_sibling_project(path)
+    if "experiment_plan" in raw:
+        data=raw
+    else:
+        product=raw.get("product",raw.get("product_name","")) or sibling.get("product",sibling.get("product_name",""))
+        product_analysis=raw.get("product_analysis",{}) or sibling.get("product_analysis",{})
+        version=raw.get("version","") or sibling.get("script_generator_version",sibling.get("version","2.7"))
+        data={"version":version,"product":product,"product_analysis":product_analysis,"experiment_plan":raw}
+    if not data.get("product"):
+        raise ValueError("상품명을 복원할 수 없습니다. script JSON을 선택하거나 experiment_plan.json 옆에 project.json을 두세요.")
     conn=sqlite3.connect(db_path);conn.row_factory=sqlite3.Row;count=register_candidates(conn,data,source_project=str(path));total=conn.execute("SELECT COUNT(*) FROM creative_registry").fetchone()[0];conn.close()
-    return {"source":str(path),"registered":count,"registry_rows":total}
+    return {"source":str(path),"registered":count,"registry_rows":total,"product":data.get("product"),"category":data.get("product_analysis",{}).get("category","")}
 
 def parse_args():
     p=argparse.ArgumentParser(description="V2.7 creative registry");p.add_argument("plan");p.add_argument("--db",required=True);return p.parse_args()
