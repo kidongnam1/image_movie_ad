@@ -12,6 +12,11 @@ __pycache__/
 # Runtime logs
 content_script_collector_v2/logs/
 
+# Runtime performance learning DB (local operational data)
+content_script_collector_v2/database/ad_performance.sqlite
+content_script_collector_v2/database/ad_performance.sqlite-wal
+content_script_collector_v2/database/ad_performance.sqlite-shm
+
 # OS
 Thumbs.db
 .DS_Store
