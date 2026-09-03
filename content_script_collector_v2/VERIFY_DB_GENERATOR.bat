@@ -4,27 +4,37 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ==========================================================
-echo Script Generator V2.6 - DB + 성과학습 + 회귀 검증
+echo Script Generator V2.6 - DB + 성과학습 + 전수 회귀 검증
 echo ==========================================================
 echo.
 
-echo [1/5] Python syntax check
-python -m py_compile generator\script_generator_v25.py generator\ad_performance_learning.py generator\script_generator_v26.py generator\script_generator_v2.py
+echo [1/7] Python syntax check
+python -m py_compile generator\script_generator_v25.py generator\ad_performance_learning.py generator\script_generator_v26.py generator\script_generator_v2.py generator\creative_package_v26.py
 if errorlevel 1 goto FAIL
 
-echo [2/5] V2.5 기존 5상품 회귀테스트
+echo [2/7] 기존 selftest + 5상품 회귀테스트
+python tests\selftest_v2.py
+if errorlevel 1 goto FAIL
 python tests\test_script_generator_v25.py
 if errorlevel 1 goto FAIL
 
-echo [3/5] V2.6 성과 DB 테스트
+echo [3/7] V2.6 성과 DB / 중복 / 표본축소 / Hook-Creative 학습
 python tests\test_ad_performance_learning.py
 if errorlevel 1 goto FAIL
 
-echo [4/5] V2.6 학습 재랭킹 / Cold Start 테스트
+echo [4/7] V2.6 학습 재랭킹 / Cold Start / A-B-C 테스트
 python tests\test_script_generator_v26.py
 if errorlevel 1 goto FAIL
 
-echo [5/5] Real Content DB integration
+echo [5/7] Creative Package V2.6 sidecar 테스트
+python tests\test_creative_package_v26.py
+if errorlevel 1 goto FAIL
+
+echo [6/7] 기존 Creative Package 회귀테스트
+python tests\test_creative_package_v1.py
+if errorlevel 1 goto FAIL
+
+echo [7/7] Real Content DB integration
 python generator\script_generator_v2.py "골프 거리측정기" --must-emphasize "0.2초 측정|손떨림 보정" --features "800m 측정|150g 초경량" --target "40~60대 골퍼" --intensity 5 --require-db --outdir outputs_verify
 if errorlevel 1 goto FAIL
 
