@@ -46,6 +46,11 @@ def sha256_file(path: str | Path) -> str:
     return h.hexdigest()
 
 
+def provenance_path(path: str | Path) -> Path:
+    p = Path(path)
+    return p.with_suffix(p.suffix + ".source.json")
+
+
 def write_provenance(path: str | Path, *, source_type: str, source: str = "", rights_basis: str = "확인 필요") -> Path:
     p = Path(path)
     meta = {
@@ -58,7 +63,22 @@ def write_provenance(path: str | Path, *, source_type: str, source: str = "", ri
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "policy_note": "워터마크 제거, 출처 은폐, 저작권 회피를 수행하지 않습니다. 실제 광고 사용 전 권리/라이선스를 확인하세요.",
     }
-    sidecar = p.with_suffix(p.suffix + ".source.json")
+    sidecar = provenance_path(p)
+    sidecar.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    return sidecar
+
+
+def update_rights_metadata(path: str | Path, rights_basis: str) -> Path:
+    p = Path(path); sidecar = provenance_path(p)
+    try:
+        meta = json.loads(sidecar.read_text(encoding="utf-8")) if sidecar.exists() else {}
+    except Exception:
+        meta = {}
+    meta.update({
+        "asset": str(p), "rights_basis": rights_basis, "approved_for_ad_use": rights_basis in RIGHTS_OK,
+        "sha256": sha256_file(p), "rights_updated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "policy_note": "워터마크 제거, 출처 은폐, 저작권 회피를 수행하지 않습니다. 실제 광고 사용 전 권리/라이선스를 확인하세요.",
+    })
     sidecar.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     return sidecar
 
@@ -121,26 +141,41 @@ def download_image_url(url: str, product: str = "product", rights_basis: str = "
         import requests
     except ImportError as exc:
         raise RuntimeError("URL 이미지 가져오기에는 requests가 필요합니다.") from exc
-    with requests.get(url, stream=True, timeout=(8, 20), allow_redirects=True, headers={"User-Agent": "ImageMovieAd/2.7"}) as r:
+    current = url.strip()
+    response = None
+    for _ in range(6):
+        _validate_remote_url(current)
+        r = requests.get(current, stream=True, timeout=(8, 20), allow_redirects=False, headers={"User-Agent": "ImageMovieAd/2.7"})
+        if r.is_redirect or r.is_permanent_redirect:
+            location = r.headers.get("Location")
+            r.close()
+            if not location:
+                raise ValueError("리다이렉트 주소가 비어 있습니다.")
+            from urllib.parse import urljoin
+            current = urljoin(current, location)
+            continue
+        response = r
+        break
+    if response is None:
+        raise ValueError("이미지 URL 리다이렉트가 너무 많습니다.")
+    with response as r:
         r.raise_for_status()
+        _validate_remote_url(r.url)
         ctype = (r.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
         if not ctype.startswith("image/"):
             raise ValueError(f"직접 이미지 URL이 아닙니다. Content-Type={ctype or 'unknown'}")
         suffix = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "image/bmp": ".bmp"}.get(ctype, ".img")
         if suffix == ".img":
             raise ValueError(f"지원하지 않는 이미지 형식입니다: {ctype}")
-        dst = image_target(product, suffix)
-        size = 0
+        dst = image_target(product, suffix); size = 0
         with dst.open("wb") as f:
             for chunk in r.iter_content(1024 * 256):
-                if not chunk:
-                    continue
+                if not chunk: continue
                 size += len(chunk)
                 if size > MAX_DOWNLOAD_BYTES:
-                    f.close(); dst.unlink(missing_ok=True)
-                    raise ValueError("이미지가 20MB를 초과합니다.")
+                    f.close(); dst.unlink(missing_ok=True); raise ValueError("이미지가 20MB를 초과합니다.")
                 f.write(chunk)
-    write_provenance(dst, source_type="image_url", source=url, rights_basis=rights_basis)
+    write_provenance(dst, source_type="image_url", source=current, rights_basis=rights_basis)
     return dst
 
 
@@ -181,6 +216,7 @@ def launch_gui() -> int:
     def check_rights():
         if image_path.get() and rights.get() not in RIGHTS_OK:
             raise ValueError("이미지를 광고에 사용하려면 권리 상태를 확인해 선택하세요. 출처를 숨기거나 저작권을 우회하는 방식은 지원하지 않습니다.")
+        if image_path.get(): update_rights_metadata(image_path.get(), rights.get())
     def args_common():
         if not product.get().strip():raise ValueError("상품명을 입력하세요.")
         check_rights()
