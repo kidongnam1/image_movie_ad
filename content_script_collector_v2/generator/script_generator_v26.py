@@ -31,14 +31,23 @@ def _hook_obj(payload: dict[str, Any]):
     return core.Hook(**{k: payload[k] for k in names})
 
 
-def _apply_hook_learning(hooks: list[dict[str, Any]], profile: dict[str, Any]) -> list[dict[str, Any]]:
+def _combined_adjustment(product: str, category: str, angle: str, hook_text: str, profile: dict[str, Any]) -> tuple[float, dict[str, float]]:
+    angle_adj = float(profile.get("angle_adjustments", {}).get(angle, 0.0) or 0.0)
+    hook_adj = float(profile.get("hook_adjustments", {}).get(hook_text, 0.0) or 0.0)
+    cid = learner.creative_id(product, category, angle, hook_text)
+    creative_adj = float(profile.get("creative_adjustments", {}).get(cid, 0.0) or 0.0)
+    total = max(-8.0, min(8.0, angle_adj + hook_adj + creative_adj))
+    return round(total, 2), {"angle": round(angle_adj, 2), "hook": round(hook_adj, 2), "creative": round(creative_adj, 2)}
+
+
+def _apply_hook_learning(hooks: list[dict[str, Any]], profile: dict[str, Any], product: str, category: str) -> list[dict[str, Any]]:
     out = []
-    adjustments = profile.get("angle_adjustments", {})
     for raw in hooks:
         h = copy.deepcopy(raw)
-        adj = float(adjustments.get(h.get("angle", ""), 0.0) or 0.0)
+        adj, parts = _combined_adjustment(product, category, h.get("angle", ""), h.get("text", ""), profile)
         h["base_score"] = float(h.get("score", 0.0) or 0.0)
-        h["performance_adjustment"] = round(adj, 2)
+        h["performance_adjustment"] = adj
+        h["performance_adjustment_parts"] = parts
         h["learned_score"] = _clamp(h["base_score"] + adj)
         out.append(h)
     return out
@@ -55,8 +64,7 @@ def _diverse_top3(hooks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for h in pool:
         angle = str(h.get("angle", ""))
         if angle not in used:
-            selected.append(h)
-            used.add(angle)
+            selected.append(h); used.add(angle)
         if len(selected) == 3:
             return selected
     for h in pool:
@@ -67,17 +75,18 @@ def _diverse_top3(hooks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return selected
 
 
-def _apply_competition_learning(items: list[dict[str, Any]], profile: dict[str, Any]) -> list[dict[str, Any]]:
-    adjustments = profile.get("angle_adjustments", {})
+def _apply_competition_learning(items: list[dict[str, Any]], profile: dict[str, Any], product: str, category: str) -> list[dict[str, Any]]:
     out = []
     for raw in items:
         item = copy.deepcopy(raw)
         angle = item.get("angle", "")
-        adj = float(adjustments.get(angle, 0.0) or 0.0)
+        hook_text = str(item.get("hook", {}).get("text", ""))
+        adj, parts = _combined_adjustment(product, category, angle, hook_text, profile)
         scores = item.setdefault("scores", {})
         base_total = float(scores.get("total", 0.0) or 0.0)
         scores["base_total"] = base_total
         scores["performance_adjustment"] = round(adj, 2)
+        scores["performance_adjustment_parts"] = parts
         scores["learned_total"] = _clamp(base_total + adj)
         out.append(item)
     return sorted(
@@ -88,11 +97,15 @@ def _apply_competition_learning(items: list[dict[str, Any]], profile: dict[str, 
 
 
 def _best_hook_for_angle(hooks: list[dict[str, Any]], angle: str) -> dict[str, Any]:
-    candidates = [h for h in hooks if h.get("angle") == angle] or hooks
+    candidates = [h for h in hooks if h.get("angle") == angle]
+    if not candidates:
+        candidates = hooks
     return max(candidates, key=lambda h: h.get("learned_score", h.get("score", 0)))
 
 
-def _build_experiment_candidates(data: dict[str, Any], profile: dict[str, Any], minimum_impressions: int) -> list[dict[str, Any]]:
+def _build_experiment_candidates(
+    data: dict[str, Any], profile: dict[str, Any], minimum_impressions: int
+) -> list[dict[str, Any]]:
     competition = data.get("creative_competition", [])[:3]
     hooks = data.get("hooks", [])
     active = bool(profile.get("active")) and profile.get("total_impressions", 0) >= 5000
@@ -157,12 +170,14 @@ def generate(
     profile = learner.build_learning_profile(base["product_analysis"]["category"], db_path) if learning else {
         "active": False, "reason": "learning disabled", "total_rows": 0, "total_impressions": 0,
         "category": base["product_analysis"]["category"], "angle_adjustments": {a: 0.0 for a in learner.ANGLE_NAMES},
-        "angle_details": {}, "baselines": {},
+        "angle_details": {}, "hook_adjustments": {}, "creative_adjustments": {}, "baselines": {},
     }
 
-    learned_hooks = _apply_hook_learning(base["hooks"], profile)
+    product_name = base["product"]
+    category_name = base["product_analysis"]["category"]
+    learned_hooks = _apply_hook_learning(base["hooks"], profile, product_name, category_name)
     top3 = _diverse_top3(learned_hooks)
-    competition = _apply_competition_learning(base["creative_competition"], profile)
+    competition = _apply_competition_learning(base["creative_competition"], profile, product_name, category_name)
     winner = next((x for x in competition if x.get("qualified", True)), competition[0])
     winner_angle = winner["angle"]
     winner_hook = _best_hook_for_angle(learned_hooks, winner_angle)
@@ -183,10 +198,8 @@ def generate(
     base["top3"] = top3
     base["creative_competition"] = competition
     base["winner"] = {
-        "copywriter": winner.get("copywriter"),
-        "angle": winner_angle,
-        "angle_label": winner.get("angle_label"),
-        "scores": winner.get("scores", {}),
+        "copywriter": winner.get("copywriter"), "angle": winner_angle,
+        "angle_label": winner.get("angle_label"), "scores": winner.get("scores", {}),
         "hook": winner_hook["text"],
     }
     base["scripts_by_duration"] = scripts
@@ -202,9 +215,7 @@ def generate(
 
     candidates = _build_experiment_candidates(base, profile, experiment_min_impressions)
     base["performance_learning"] = {
-        "database": str(db_path),
-        "enabled": bool(learning),
-        "import_result": import_result,
+        "database": str(db_path), "enabled": bool(learning), "import_result": import_result,
         **profile,
     }
     base["experiment_plan"] = {
@@ -222,27 +233,16 @@ def generate(
 def render_md(data: dict[str, Any]) -> str:
     text = core.render_md(data).replace("Script Generator V2.5", "Script Generator V2.6", 1)
     learning = data["performance_learning"]
-    lines = [
-        text, "", "## V2.6 성과학습",
-        f"- 학습 활성: **{learning.get('active', False)}**",
-        f"- 누적 행: {learning.get('total_rows', 0)}",
-        f"- 누적 노출: {learning.get('total_impressions', 0)}",
-        f"- Angle 보정: `{json.dumps(learning.get('angle_adjustments', {}), ensure_ascii=False)}`",
-        "", "## A/B/C 실험 후보",
-    ]
+    lines = [text, "", "## V2.6 성과학습", f"- 학습 활성: **{learning.get('active', False)}**",
+             f"- 누적 행: {learning.get('total_rows', 0)}", f"- 누적 노출: {learning.get('total_impressions', 0)}",
+             f"- Angle 보정: `{json.dumps(learning.get('angle_adjustments', {}), ensure_ascii=False)}`", "",
+             "## A/B/C 실험 후보"]
     for c in data["experiment_plan"]["candidates"]:
-        lines += [
-            f"### {c['slot']} · {c['angle_label']} · `{c['creative_id']}`",
-            f"- Hook: {c['hook']}",
-            f"- 학습점수: {c['learned_score']} (성과보정 {c['performance_adjustment']:+})",
-            f"- 권장 트래픽: {c['traffic_share_pct']}%",
-            f"- 최소 노출: {c['minimum_impressions']:,}", "",
-        ]
-    lines += [
-        "## 성과 수집 항목",
-        "`impressions, views_2s, views_3s, clicks, detail_views, purchases, revenue, spend`",
-        "", "> 실제 광고 게시와 예산 집행은 이 프로그램이 자동 수행하지 않습니다.",
-    ]
+        lines += [f"### {c['slot']} · {c['angle_label']} · `{c['creative_id']}`",
+                  f"- Hook: {c['hook']}", f"- 학습점수: {c['learned_score']} (성과보정 {c['performance_adjustment']:+})",
+                  f"- 권장 트래픽: {c['traffic_share_pct']}%", f"- 최소 노출: {c['minimum_impressions']:,}", ""]
+    lines += ["## 성과 수집 항목", "`impressions, views_2s, views_3s, clicks, detail_views, purchases, revenue, spend`",
+              "", "> 실제 광고 게시와 예산 집행은 이 프로그램이 자동 수행하지 않습니다."]
     return "\n".join(lines)
 
 
@@ -270,28 +270,18 @@ def main() -> int:
     a = parse_args()
     try:
         data = generate(
-            a.product,
-            category=a.category,
-            features=a.features,
-            must_emphasize=a.must_emphasize,
-            pain_point=a.pain_point,
-            target=a.target,
-            description=a.description,
-            intensity=a.intensity,
-            min_score=a.min_score,
-            performance_db=a.performance_db,
-            performance_file=(a.performance_file or None),
-            learning=not a.learning_off,
+            a.product, category=a.category, features=a.features, must_emphasize=a.must_emphasize,
+            pain_point=a.pain_point, target=a.target, description=a.description, intensity=a.intensity,
+            min_score=a.min_score, performance_db=a.performance_db,
+            performance_file=(a.performance_file or None), learning=not a.learning_off,
             experiment_min_impressions=a.experiment_min_impressions,
         )
         if a.require_db and not data["db_integration"]["connected"]:
             raise RuntimeError("Content DB is not connected or empty.")
-        out = Path(a.outdir)
-        out.mkdir(parents=True, exist_ok=True)
+        out = Path(a.outdir); out.mkdir(parents=True, exist_ok=True)
         safe = re.sub(r"[^0-9A-Za-z가-힣_-]+", "_", a.product)
         (out / f"{safe}_script_v2.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        md = out / f"{safe}_script_v2.md"
-        md.write_text(render_md(data), encoding="utf-8")
+        md = out / f"{safe}_script_v2.md"; md.write_text(render_md(data), encoding="utf-8")
         print("Version:", data["version"])
         print("Performance learning:", data["performance_learning"].get("active"))
         print("Winner:", data["winner"])
@@ -300,8 +290,7 @@ def main() -> int:
         return 0
     except Exception as exc:
         tb = traceback.format_exc()
-        print("ERROR:", exc)
-        print(tb)
+        print("ERROR:", exc); print(tb)
         try:
             core.LOGGER.error("Script Generator V2.6 failed: %s\n%s", exc, tb)
         except Exception:
