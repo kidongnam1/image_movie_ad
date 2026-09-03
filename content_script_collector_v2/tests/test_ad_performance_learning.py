@@ -10,11 +10,11 @@ import ad_performance_learning as perf
 
 
 class AdPerformanceLearningTests(unittest.TestCase):
-    def _make_csv(self, path: Path):
+    def _make_csv(self, path: Path, a_impressions=10000, a_clicks=600):
         with path.open("w", encoding="utf-8", newline="") as f:
             w = csv.writer(f)
             w.writerow(perf.TEMPLATE_FIELDS)
-            w.writerow(["2026-09-01", "C1", "A1", "골프 거리측정기", "golf", "meta", "problem_attack", "hook A", "0.2초 측정", 10000, 9000, 8000, 6500, 600, 500, 60, 3000000, 1000000])
+            w.writerow(["2026-09-01", "C1", "A1", "골프 거리측정기", "golf", "meta", "problem_attack", "hook A", "0.2초 측정", a_impressions, 9000, 8000, 6500, a_clicks, 500, 60, 3000000, 1000000])
             w.writerow(["2026-09-01", "C1", "B1", "골프 거리측정기", "golf", "meta", "comparison", "hook B", "0.2초 측정", 10000, 9000, 5500, 4000, 250, 200, 10, 400000, 1000000])
             w.writerow(["2026-09-01", "C1", "C1", "골프 거리측정기", "golf", "meta", "curiosity", "hook C", "0.2초 측정", 10000, 9000, 7000, 5500, 450, 350, 35, 1800000, 1000000])
 
@@ -27,6 +27,7 @@ class AdPerformanceLearningTests(unittest.TestCase):
             second = perf.import_file(csv_path, db_path)
             self.assertEqual(first["inserted"], 3)
             self.assertEqual(second["duplicates_skipped"], 3)
+            self.assertEqual(second["updated"], 0)
             profile = perf.build_learning_profile("golf", db_path)
             self.assertTrue(profile["active"])
             self.assertGreater(profile["angle_adjustments"]["problem_attack"], 0)
@@ -39,6 +40,20 @@ class AdPerformanceLearningTests(unittest.TestCase):
             self.assertLessEqual(abs(profile["hook_adjustments"]["hook A"]), 3)
             self.assertLessEqual(abs(profile["creative_adjustments"]["A1"]), 2)
             self.assertEqual(profile["total_impressions"], 30000)
+
+    def test_refreshed_snapshot_updates_instead_of_double_counting(self):
+        with tempfile.TemporaryDirectory() as td:
+            csv_path = Path(td) / "perf.csv"
+            db_path = Path(td) / "perf.sqlite"
+            self._make_csv(csv_path)
+            perf.import_file(csv_path, db_path)
+            self._make_csv(csv_path, a_impressions=12000, a_clicks=720)
+            result = perf.import_file(csv_path, db_path)
+            self.assertEqual(result["updated"], 1)
+            self.assertEqual(result["duplicates_skipped"], 2)
+            self.assertEqual(result["database_rows"], 3)
+            profile = perf.build_learning_profile("golf", db_path)
+            self.assertEqual(profile["total_impressions"], 32000)
 
     def test_invalid_funnel_row_is_rejected(self):
         with tempfile.TemporaryDirectory() as td:
