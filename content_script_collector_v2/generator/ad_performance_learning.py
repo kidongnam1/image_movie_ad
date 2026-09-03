@@ -212,6 +212,7 @@ def _metrics(agg: dict[str, float]) -> dict[str, float]:
         "retention_2s": _rate(agg["views_2s"], imp),
         "retention_3s": _rate(agg["views_3s"], imp),
         "ctr": _rate(clicks, imp),
+        "detail_view_rate": _rate(agg["detail_views"], imp),
         "purchase_cvr": _rate(agg["purchases"], clicks),
         "purchase_rate": _rate(agg["purchases"], imp),
         "roas": _rate(agg["revenue"], spend),
@@ -236,12 +237,14 @@ def _angle_adjustment(angle_agg: dict[str, float], baseline: dict[str, float]) -
     r2 = _smooth_rate(angle_agg["views_2s"], imp, baseline["retention_2s"], 600)
     r3 = _smooth_rate(angle_agg["views_3s"], imp, baseline["retention_3s"], 600)
     ctr = _smooth_rate(clicks, imp, baseline["ctr"], 800)
+    detail = _smooth_rate(angle_agg["detail_views"], imp, baseline["detail_view_rate"], 800)
     cvr = _smooth_rate(angle_agg["purchases"], clicks, baseline["purchase_cvr"], 80)
     roas = _metrics(angle_agg)["roas"] if angle_agg["spend"] > 0 else baseline["roas"]
     weighted_lift = (
-        _lift(r2, baseline["retention_2s"]) * .25 +
-        _lift(r3, baseline["retention_3s"]) * .15 +
+        _lift(r2, baseline["retention_2s"]) * .20 +
+        _lift(r3, baseline["retention_3s"]) * .10 +
         _lift(ctr, baseline["ctr"]) * .25 +
+        _lift(detail, baseline["detail_view_rate"]) * .10 +
         _lift(cvr, baseline["purchase_cvr"]) * .25 +
         _lift(roas, baseline["roas"]) * .10
     )
@@ -251,7 +254,8 @@ def _angle_adjustment(angle_agg: dict[str, float], baseline: dict[str, float]) -
     adjustment = max(-6.0, min(6.0, weighted_lift * 12.0 * confidence))
     return round(adjustment, 2), {
         "retention_2s": round(r2, 6), "retention_3s": round(r3, 6),
-        "ctr": round(ctr, 6), "purchase_cvr": round(cvr, 6), "roas": round(roas, 4),
+        "ctr": round(ctr, 6), "detail_view_rate": round(detail, 6),
+        "purchase_cvr": round(cvr, 6), "roas": round(roas, 4),
         "confidence": round(confidence, 4), "impressions": int(imp),
     }
 
@@ -312,7 +316,7 @@ def build_learning_profile(category: str = "", db_path: str | Path | None = None
         "baselines": {k: round(v, 6) if isinstance(v, float) else v for k, v in baseline.items()},
         "angle_adjustments": adjustments, "angle_details": details,
         "hook_adjustments": hook_adjustments, "creative_adjustments": creative_adjustments,
-        "weights": {"retention_2s": .25, "retention_3s": .15, "ctr": .25, "purchase_cvr": .25, "roas": .10},
+        "weights": {"retention_2s": .20, "retention_3s": .10, "ctr": .25, "detail_view_rate": .10, "purchase_cvr": .25, "roas": .10},
         "max_adjustment": 6.0, "max_hook_adjustment": 3.0, "max_creative_adjustment": 2.0,
     }
 
