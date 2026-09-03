@@ -17,6 +17,9 @@ content_script_collector_v2/database/ad_performance.sqlite
 content_script_collector_v2/database/ad_performance.sqlite-wal
 content_script_collector_v2/database/ad_performance.sqlite-shm
 
+# Local product images / source-rights sidecars
+content_script_collector_v2/input_images/
+
 # OS
 Thumbs.db
 .DS_Store
