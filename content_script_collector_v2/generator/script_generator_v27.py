@@ -18,10 +18,11 @@ ROOT=Path(__file__).resolve().parents[1]
 DEFAULT_PERFORMANCE_DB=ROOT/"database/ad_performance.sqlite"
 
 def generate(product: str, **kwargs: Any):
+    source_project=str(kwargs.pop("source_project","") or "")
     data=core.generate(product,**kwargs)
     db_path=Path(kwargs.get("performance_db") or DEFAULT_PERFORMANCE_DB)
     conn=store.connect(db_path)
-    registered=registry.register_candidates(conn,data,source_project=str(kwargs.get("source_project","") or ""))
+    registered=registry.register_candidates(conn,data,source_project=source_project)
     conn.close()
     data["version"]="2.7"
     data["creative_registry"]={"database":str(db_path),"registered_candidates":registered,"id_pattern":"CR-XXXXXXXXXXXX","usage":"광고명에 creative_id를 포함하면 플랫폼 성과 CSV를 자동으로 상품/Angle/Hook에 연결할 수 있습니다."}
