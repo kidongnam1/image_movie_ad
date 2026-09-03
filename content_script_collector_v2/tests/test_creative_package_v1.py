@@ -84,6 +84,31 @@ class CreativePackageV1Tests(unittest.TestCase):
             scores = json.loads((out / "creative_scores.json").read_text(encoding="utf-8"))
             self.assertIn(scores["recommended_variant"], cp.VARIANTS)
 
+    @patch.object(cp.legacy, "generate", side_effect=fake_legacy_generate)
+    def test_non_beauty_package_does_not_fall_back_to_skincare(self, _mock_generate):
+        config = cp.build_project_config(
+            "골프 거리측정기",
+            target_audience="40~60대 골퍼",
+            duration_sec=30,
+            project_id="golf_test",
+            must_emphasize="0.2초 측정",
+            pain_point="거리 판단이 늦어 샷 템포가 끊기는 문제",
+            intensity=4,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            out = cp.generate_package(config, Path(td), require_db=True)
+            project = json.loads((out / "project.json").read_text(encoding="utf-8"))
+            self.assertEqual(project["product_analysis"]["category"], "golf")
+            self.assertEqual(project["product_analysis"]["primary_selling_point"], "0.2초 측정")
+            for variant in cp.VARIANTS:
+                script = (out / variant / "script.md").read_text(encoding="utf-8")
+                image_prompts = (out / variant / "image_prompts.json").read_text(encoding="utf-8").lower()
+                video_prompts = (out / variant / "video_prompts.json").read_text(encoding="utf-8").lower()
+                self.assertNotIn("피부", script)
+                self.assertNotIn("제형", script)
+                self.assertNotIn("korean beauty", image_prompts)
+                self.assertNotIn("korean beauty", video_prompts)
+
     def test_claim_gate_blocks(self):
         variants = {
             "ugc": {"scenes": [{"spoken": "100% 치료", "caption": "", "visual": ""}]},
