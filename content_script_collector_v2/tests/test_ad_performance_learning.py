@@ -31,7 +31,13 @@ class AdPerformanceLearningTests(unittest.TestCase):
             self.assertTrue(profile["active"])
             self.assertGreater(profile["angle_adjustments"]["problem_attack"], 0)
             self.assertLess(profile["angle_adjustments"]["comparison"], 0)
+            self.assertGreater(profile["hook_adjustments"]["hook A"], 0)
+            self.assertLess(profile["hook_adjustments"]["hook B"], 0)
+            self.assertGreater(profile["creative_adjustments"]["A1"], 0)
+            self.assertLess(profile["creative_adjustments"]["B1"], 0)
             self.assertLessEqual(abs(profile["angle_adjustments"]["problem_attack"]), 6)
+            self.assertLessEqual(abs(profile["hook_adjustments"]["hook A"]), 3)
+            self.assertLessEqual(abs(profile["creative_adjustments"]["A1"]), 2)
             self.assertEqual(profile["total_impressions"], 30000)
 
     def test_invalid_funnel_row_is_rejected(self):
@@ -58,6 +64,8 @@ class AdPerformanceLearningTests(unittest.TestCase):
             perf.import_file(csv_path, db_path)
             profile = perf.build_learning_profile("home_appliance", db_path)
             self.assertLess(abs(profile["angle_adjustments"]["problem_attack"]), 1.0)
+            self.assertEqual(profile["hook_adjustments"]["hook"], 0.0)
+            self.assertEqual(profile["creative_adjustments"]["A"], 0.0)
 
 
 if __name__ == "__main__":
