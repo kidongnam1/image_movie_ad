@@ -1,22 +1,192 @@
-# Content / Script Collector + Script Generator V2.6
+# Image Movie Ad — Script Generator V2.7
 
 ## 현재 활성 엔진
 
-기존 실행 경로 `generator/script_generator_v2.py`는 그대로 유지되며 내부적으로 **V2.6 성과학습 엔진**을 사용합니다.
+기존 실행 경로 `generator/script_generator_v2.py`는 유지되며 내부적으로 **V2.7**을 사용합니다.
 
-V2.6 흐름:
+V2.7은 V2.5의 강한 Hook + V2.6의 실광고 성과학습 위에 다음을 추가합니다.
 
-1. 상품 카테고리 자동 판별
-2. 사용자가 지정한 `반드시 강조할 Selling Point` 우선 반영
-3. 광고 강도 1~5 + V2.5 Strong Hook Gate
-4. Hook 30개 + Creative Competition
-5. 과거 실광고 성과가 있으면 Angle/Hook/creative_id별 점수 자동 보정
-6. A/B/C 후보 3개와 `creative_id` 생성
-7. 15초 / 30초 / 45초 대본 + 영상 Prompt 생성
-8. 실제 광고 성과를 CSV/JSON/XLSX로 다시 입력
-9. 다음 생성부터 2초·3초 유지율 / CTR / 상세페이지 유입 / 구매전환 / ROAS를 학습
+1. A/B/C `CR-XXXXXXXXXXXX` Creative Registry 자동 등록
+2. Meta / TikTok / Naver / Coupang / Generic 성과 파일 헤더 자동 매핑
+3. CR ID를 이용한 상품·카테고리·Angle·Hook·Selling Point 자동 복원
+4. 플랫폼/상품/카테고리/Angle/Hook/Creative 성과 대시보드
+5. Windows 상품 이미지 입력창
+   - Ctrl+V 클립보드 이미지
+   - PNG/JPG/JPEG/WebP/BMP 파일
+   - 직접 이미지 URL
+   - 상품 페이지 URL 메타데이터
+6. 이미지 출처·권리 상태 sidecar 기록 및 광고 사용 권리 Gate
 
-## 성과학습에서 사용하는 지표
+---
+
+## 가장 쉬운 사용법
+
+### A. 상품 이미지까지 넣고 광고를 만들 때
+
+```bat
+OPEN_PRODUCT_IMAGE_INPUT_V27.bat
+```
+
+Windows 창에서 다음을 입력합니다.
+
+- 상품명
+- 상품 페이지 URL(선택)
+- 반드시 강조할 특징
+- 추가 특징
+- Pain Point
+- 타깃
+- 광고 강도
+- 상품 이미지
+
+상품 이미지는 세 가지 방식으로 넣을 수 있습니다.
+
+- 화면 캡처 후 `Ctrl+V`
+- `이미지 파일 불러오기`
+- `이미지 URL 불러오기`
+
+URL은 **직접 이미지 URL(http/https)** 을 사용합니다. 상품 상세페이지 주소는 별도의 `상품 페이지 URL` 칸에 넣습니다.
+
+이미지는 `input_images/YYYYMMDD/` 폴더에 로컬 보관됩니다.
+
+이미지마다 다음 sidecar가 같이 생성됩니다.
+
+```text
+상품이미지.png.source.json
+```
+
+기록 항목:
+
+- 원본 출처 타입
+- 파일 원본 경로 또는 이미지 URL
+- SHA-256
+- 저장 시각
+- 광고 사용 권리 상태
+
+### 이미지 권리 Gate
+
+광고/영상 생성에 이미지를 사용하려면 다음 중 하나를 선택해야 합니다.
+
+- 내가 직접 촬영/제작
+- 상업 이용 라이선스 보유
+- 판매자/권리자 사용허락
+- 퍼블릭 도메인/상업 이용 가능 라이선스
+
+`확인 필요` 상태에서는 이미지를 미리볼 수 있지만 이미지가 포함된 광고/영상 생성은 중단합니다.
+
+프로그램은 **워터마크 제거, 출처 은폐, 저작권 회피, 무단 이미지 세탁 기능을 제공하지 않습니다.** 실제 상업 이용 가능 범위는 권리자 허락·라이선스·플랫폼 약관을 확인해야 합니다.
+
+### B. 텍스트 정보만으로 대본을 만들 때
+
+```bat
+GENERATE_SCRIPT_V2.bat
+```
+
+기존 사용법을 그대로 유지합니다.
+
+---
+
+## Creative Package
+
+```bat
+GENERATE_CREATIVE_PACKAGE_V1.bat
+```
+
+UGC / Product Demo / Cinematic 결과를 생성하며 V2.7 Creative Registry가 활성화됩니다.
+
+이미지 GUI에서 실행하면 선택한 상품 이미지 경로와 상품 페이지 URL도 `project.json`에 전달됩니다.
+
+---
+
+# Creative ID 운영 규칙
+
+V2.7에서 A/B/C 후보는 다음과 같은 ID를 갖습니다.
+
+```text
+A  CR-XXXXXXXXXXXX
+B  CR-XXXXXXXXXXXX
+C  CR-XXXXXXXXXXXX
+```
+
+실제 광고 플랫폼에서 광고명 또는 소재명에 이 ID를 포함하는 것을 권장합니다.
+
+예:
+
+```text
+Golf_Rangefinder_A_CR-1234ABCDEF56
+```
+
+이후 플랫폼에서 내려받은 성과 파일에 이 광고명이 들어 있으면 V2.7이 `CR-...`를 찾아 Creative Registry에서 다음 정보를 복원합니다.
+
+- 상품명
+- 카테고리
+- Angle
+- Hook
+- Selling Point
+
+과거 V2.6의 `experiment_plan.json`도 등록할 수 있습니다.
+
+```bat
+REGISTER_EXPERIMENT_PLAN_V27.bat
+```
+
+`experiment_plan.json` 옆에 `project.json`이 있으면 상품명과 카테고리까지 자동 복원합니다.
+
+---
+
+# 플랫폼 성과 파일 가져오기
+
+가장 쉬운 방법:
+
+```bat
+IMPORT_PLATFORM_PERFORMANCE_V27.bat
+```
+
+지원 입력:
+
+- CSV
+- JSON
+- XLSX
+- XLSM
+
+플랫폼 선택:
+
+- auto
+- meta
+- tiktok
+- naver
+- coupang
+- generic
+
+`auto`는 헤더 별칭을 이용해 best-effort로 플랫폼을 감지합니다. 플랫폼의 export 형식은 변경될 수 있으므로 알 수 없는 헤더는 버리지 않고 `unmapped_headers`로 보고합니다.
+
+CR ID가 없는 기존 광고 파일은 기본 상품명/카테고리를 직접 입력해 가져올 수 있습니다.
+
+V2.6 공통 입력 형식도 계속 지원합니다.
+
+```bat
+IMPORT_AD_PERFORMANCE_V26.bat
+```
+
+---
+
+# 성과 DB
+
+- Content DB: `database/content_script.sqlite`
+- 광고 성과 DB: `database/ad_performance.sqlite`
+
+성과 저장은 Snapshot-safe입니다.
+
+- 같은 광고·같은 기간·같은 수치 → SKIP
+- 같은 광고·같은 기간의 갱신 누적수치 → UPDATE
+- 새로운 광고/기간 → INSERT
+
+따라서 누적 export를 반복 가져와도 같은 성과를 단순 합산해 과대집계하지 않습니다.
+
+운영 SQLite와 `input_images/`는 `.gitignore`에 포함되어 GitHub에 올라가지 않습니다.
+
+---
+
+# V2.6/V2.7 성과학습 지표
 
 | 지표 | 비중 |
 |---|---:|
@@ -27,206 +197,123 @@ V2.6 흐름:
 | 구매전환율 | 25% |
 | ROAS | 10% |
 
-성과 보정은 다음처럼 제한합니다.
+성과 보정 상한:
 
-- Angle: 최대 ±6점
-- 동일 Hook 문구: 최대 ±3점
-- 동일 `creative_id`: 최대 ±2점
-- 최종 합산 성과보정: 최대 ±8점
+- Category + Angle: ±6점
+- 동일 Hook: ±3점
+- 동일 Creative: ±2점
+- 최종 합산: ±8점
 
-표본이 작으면 Bayesian shrinkage와 신뢰도 보정으로 영향이 거의 0에 가깝게 줄어듭니다. 성과학습은 안전/품질 Gate를 우회하지 않고 Gate를 통과한 후보의 순위만 제한적으로 조정합니다.
+표본이 적으면 Bayesian shrinkage / 노출 신뢰도 보정으로 영향이 작아집니다.
 
-## 성과 DB
+성과학습은 **안전 Gate → 품질 Gate**를 통과한 후보끼리 순위만 조정합니다.
 
-기존 Content DB와 분리합니다.
+---
 
-- Content 지식 DB: `database/content_script.sqlite`
-- 광고 성과 DB: `database/ad_performance.sqlite`
-
-성과 DB는 자동 생성되며 같은 행을 두 번 가져오면 SHA-256 fingerprint로 중복 저장하지 않습니다. 운영 DB 파일과 WAL/SHM 파일은 `.gitignore`에 포함되어 GitHub에 커밋되지 않습니다.
-
-## 1. 성과 입력 템플릿 만들기
-
-가장 쉬운 방법:
+# V2.7 로컬 성과 대시보드
 
 ```bat
-CREATE_AD_PERFORMANCE_TEMPLATE_V26.bat
+OPEN_PERFORMANCE_DASHBOARD_V27.bat
 ```
 
-또는 저장소의 다음 샘플을 복사해 사용합니다.
+생성 파일:
 
 ```text
-samples/ad_performance_template.csv
+outputs/performance_dashboard_v27.html
+outputs/performance_dashboard_v27.json
 ```
 
-필드:
+HTML은 외부 CDN이나 Chart.js가 필요 없는 standalone 파일입니다.
+
+필터:
+
+- 플랫폼
+- 상품
+- 카테고리
+- Angle
+
+주요 KPI:
+
+- 노출
+- 2초 유지율
+- 3초 유지율
+- CTR
+- 상세페이지 유입률
+- 구매전환율
+- 구매수
+- 매출
+- 광고비
+- ROAS
+
+비교표:
+
+- Angle별 CTR / CVR / ROAS
+- Hook별 CTR / CVR / ROAS
+- 상품별 성과
+- Creative ID별 성과
+- 플랫폼별 ROAS
+
+---
+
+# 전체 운영 루프
 
 ```text
-observed_at,campaign_id,creative_id,product,category,platform,angle,hook_text,selling_point,impressions,video_starts,views_2s,views_3s,clicks,detail_views,purchases,revenue,spend
+상품 + 강조점 + 상품 이미지 입력
+        ↓
+V2.7 대본 / Creative Package
+        ↓
+A/B/C CR Creative ID 생성 및 Registry 등록
+        ↓
+실제 광고 플랫폼에서 사람이 승인/게시
+        ↓
+플랫폼 성과 CSV/XLSX 다운로드
+        ↓
+IMPORT_PLATFORM_PERFORMANCE_V27.bat
+        ↓
+플랫폼 헤더 자동 변환 + CR ID 메타데이터 복원
+        ↓
+ad_performance.sqlite
+        ↓
+OPEN_PERFORMANCE_DASHBOARD_V27.bat
+        ↓
+Hook / Angle / Product / Creative 성과 비교
+        ↓
+다음 V2.7 생성에서 성과학습 반영
 ```
 
-지원 파일:
+프로그램은 실제 광고 게시나 예산 지출을 자동 수행하지 않습니다.
 
-- CSV
-- JSON
-- XLSX / XLSM (`openpyxl` 사용)
+---
 
-## 2. 광고 성과 가져오기
-
-```bat
-IMPORT_AD_PERFORMANCE_V26.bat
-```
-
-또는:
-
-```bat
-python generator\ad_performance_learning.py import "내광고성과.xlsx" --db database\ad_performance.sqlite
-```
-
-학습 현황 확인:
-
-```bat
-python generator\ad_performance_learning.py report --category golf
-```
-
-## 3. 대본 생성
-
-기존 실행 파일 그대로 사용합니다.
-
-```bat
-GENERATE_SCRIPT_V2.bat
-```
-
-입력 항목:
-
-- 상품명
-- 반드시 강조할 특징
-- 추가 특징
-- Pain Point
-- 타깃 고객
-- 광고 강도 1~5
-- 성과 파일 경로(선택)
-
-예:
-
-```bat
-python generator\script_generator_v2.py "골프 거리측정기" ^
-  --must-emphasize "0.2초 측정|손떨림 보정" ^
-  --features "800m 측정|150g 초경량" ^
-  --pain-point "거리 판단이 늦어 샷 템포가 끊기는 문제" ^
-  --target "40~60대 골퍼" ^
-  --intensity 5 ^
-  --performance-file "광고성과.xlsx" ^
-  --require-db
-```
-
-성과 데이터가 아직 없으면 **Cold Start**로 V2.5 품질점수를 그대로 사용하고 A/B/C 트래픽은 34/33/33으로 제안합니다.
-
-누적 성과 노출이 5,000 이상이면 학습 점수를 활용하고 A/B/C 기본 배분은 40/30/30으로 제안합니다. 이 배분은 실제 광고 플랫폼에 자동 적용하지 않고 실험 계획으로만 저장합니다.
-
-## 4. V2.6 주요 산출물
-
-기존 산출물에 다음 필드가 추가됩니다.
-
-- `performance_learning`
-  - 누적 성과 행
-  - 누적 노출
-  - 기준 지표
-  - Angle별 성과 보정
-  - 동일 Hook 성과 보정
-  - 동일 `creative_id` 성과 보정
-- `experiment_plan`
-  - A/B/C 후보
-  - 고유 `creative_id`
-  - Hook
-  - Selling Point
-  - base score / performance adjustment / learned score
-  - 권장 트래픽 배분
-  - 후보별 최소 노출
-
-예:
-
-```text
-A / CR-XXXXXXXXXXXX / 문제공격형 / 40%
-B / CR-XXXXXXXXXXXX / 호기심형   / 30%
-C / CR-XXXXXXXXXXXX / 손실회피형 / 30%
-```
-
-`creative_id`는 상품 + 카테고리 + Angle + Hook을 기반으로 결정적으로 생성합니다. 실제 광고 이름이나 메모에 이 ID를 남긴 뒤 성과 파일의 `creative_id`에 다시 넣으면 동일 Creative 성과를 직접 학습할 수 있습니다.
-
-## 5. Creative Package
-
-기존 BAT를 그대로 사용합니다.
-
-```bat
-GENERATE_CREATIVE_PACKAGE_V1.bat
-```
-
-내부적으로 V2.6 래퍼를 사용하며 기존 UGC / Product Demo / Cinematic 산출물에 추가로 다음 파일을 만듭니다.
-
-- `performance_learning.json`
-- `experiment_plan.json`
-
-또한 `project.json`, `strategy.md`, `manifest.json`에도 V2.6 학습 정보를 기록합니다.
-
-## 6. 반복 운영 루프
-
-```text
-상품 입력
-  ↓
-V2.6 대본 생성
-  ↓
-A/B/C creative_id 생성
-  ↓
-실제 광고 집행 (외부 플랫폼에서 사람이 승인/집행)
-  ↓
-노출 / 2초 / 3초 / 클릭 / 상세페이지 / 구매 / 매출 / 광고비 수집
-  ↓
-IMPORT_AD_PERFORMANCE_V26.bat
-  ↓
-ad_performance.sqlite 누적
-  ↓
-다음 생성 시 Angle + Hook + Creative 점수 자동 보정
-```
-
-프로그램은 **실제 광고 게시나 예산 지출을 자동 실행하지 않습니다.** 비용 발생 단계는 외부 플랫폼에서 별도 승인 후 실행해야 합니다.
-
-## 7. 품질·안전 원칙
-
-V2.5의 다음 원칙을 그대로 유지합니다.
-
-- 카테고리 중립
-- 강도 4~5 Strong Hook Gate
-- Generic Hook 감점
-- First 2s Power
-- Specificity
-- 필수 Selling Point Coverage
-- 허위 후기 차단
-- 가짜 희소성 차단
-- 근거 없는 1위·최고·100% 차단
-- 치료·완치 등 의료적 과장 차단
-
-성과가 좋았다는 이유만으로 위험 표현을 다시 허용하지 않습니다.
-
-## 8. 전체 검증
+# 전체 검증
 
 ```bat
 VERIFY_DB_GENERATOR.bat
 ```
 
-검증 내용:
+검증 범위:
 
 1. Python 구문검사
-2. V2.5 5상품 회귀테스트
-3. V2.6 성과 DB 중복/유효성/표본축소 테스트
-4. V2.6 Angle/Hook/creative 성과 학습 테스트
-5. V2.6 성과 기반 재랭킹 + Cold Start 테스트
-6. Creative Package 성과학습 sidecar 테스트
-7. 실제 Content DB 연동
-8. Hook 30개 / 강조점 Coverage / A/B/C 3개 확인
+2. V2.5 대본 회귀
+3. V2.6 성과 DB / Snapshot UPDATE / 학습 회귀
+4. V2.7 Creative Registry
+5. Meta/TikTok/Naver/Coupang 어댑터
+6. Standalone Dashboard
+7. 이미지 파일/권리 sidecar/URL 안전검사
+8. 기존 Creative Package 회귀
+9. 실제 Content DB 연동
+10. 검증용 격리 Performance DB
 
-## 광고 집행 전 주의
+---
 
-사용자가 입력한 수치·성능·효능은 실제 집행 전에 상품 상세페이지, 제조사 공식 자료, 시험성적서 등으로 확인해야 합니다.
+# 광고·이미지 안전 원칙
 
-외부 이미지/영상/TTS 및 광고 플랫폼 API는 비용·키·계정 권한이 필요한 단계이므로 자동 집행하지 않습니다.
+- 허위 후기 금지
+- 가짜 희소성 금지
+- 근거 없는 1위·최고·100% 금지
+- 치료·완치 등 의료적 과장 금지
+- 사용자가 제공한 성능·효능 수치는 집행 전 공식 자료 확인
+- 이미지 워터마크 제거/출처 은폐/권리 회피 기능 없음
+- 라이선스가 확인되지 않은 이미지는 광고 생성 Gate에서 차단
+
+외부 이미지/영상/TTS 또는 광고 플랫폼 API 호출 중 비용이 발생하는 단계는 자동 집행하지 않습니다.
