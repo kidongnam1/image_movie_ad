@@ -25,15 +25,16 @@ if "%INTENSITY%"=="" set INTENSITY=4
 if "%DURATION%"=="" set DURATION=30
 
 if defined PERF (
-  python generator\creative_package_v26.py "%PRODUCT%" --description "%DESCRIPTION%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --duration %DURATION% --performance-file "%PERF%" --require-db
+  python generator\creative_package_v27.py "%PRODUCT%" --description "%DESCRIPTION%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --duration %DURATION% --performance-file "%PERF%" --require-db
 ) else (
-  python generator\creative_package_v26.py "%PRODUCT%" --description "%DESCRIPTION%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --duration %DURATION% --require-db
+  python generator\creative_package_v27.py "%PRODUCT%" --description "%DESCRIPTION%" --must-emphasize "%MUST%" --features "%FEATURES%" --pain-point "%PAIN%" --target "%TARGET%" --intensity %INTENSITY% --duration %DURATION% --require-db
 )
 if errorlevel 1 goto FAIL
 
 echo.
 echo CREATIVE PACKAGE PASS - V2.7 Registry Enabled
 echo 결과 폴더: outputs_creative
+echo performance_learning.json / experiment_plan.json / creative_registry.json / input_assets.json 생성
 echo 광고명에 experiment_plan.json의 CR-... ID를 포함하세요.
 echo 플랫폼 원본 성과는 IMPORT_PLATFORM_PERFORMANCE_V27.bat 으로 가져오세요.
 pause
