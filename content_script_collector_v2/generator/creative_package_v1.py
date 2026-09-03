@@ -5,7 +5,7 @@ import json
 import logging
 import re
 import traceback
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 KST = timezone(timedelta(hours=9))
 VARIANTS = ("ugc", "product_demo", "cinematic")
 BANNED_CLAIMS = (
-    "치료", "완치", "주름 제거", "여드름 치료", "100%", "즉시 효과", "완전히 사라",
+    "치료", "완치", "주름 제거", "여드름 치료", "100%", "즉시 효과", "완전히 사라", "무조건", "절대",
 )
 
 VARIANT_LABELS = {
@@ -26,15 +26,15 @@ VARIANT_LABELS = {
 }
 
 VARIANT_DIRECTIONS = {
-    "ugc": "실사용자가 직접 발견한 루틴처럼 자연스럽고 신뢰감 있게",
-    "product_demo": "제품 제형·사용법·사용감이 한눈에 이해되도록 명확하게",
-    "cinematic": "제품의 질감과 라이프스타일을 프리미엄 브랜드 무드로",
+    "ugc": "실사용자가 직접 불편을 발견하고 해결 포인트를 보여주는 자연스러운 퍼포먼스 광고",
+    "product_demo": "핵심 기능이 실제로 어떻게 작동하는지 짧고 명확하게 증명하는 제품 시연 광고",
+    "cinematic": "상품의 핵심 Selling Point를 라이프스타일과 프리미엄 영상미로 강조하는 브랜드 광고",
 }
 
 CAMERA_BY_VARIANT = {
-    "ugc": ["handheld close-up", "mirror medium shot", "POV product reveal", "macro texture", "handheld application", "close-up reaction", "clean end card"],
-    "product_demo": ["tight product close-up", "top-down setup", "macro dispenser", "macro texture swipe", "side application close-up", "comparison detail shot", "packshot end card"],
-    "cinematic": ["cinematic portrait close-up", "slow dolly detail", "hero product reveal", "extreme macro texture", "slow ritual close-up", "soft lifestyle medium shot", "premium packshot"],
+    "ugc": ["handheld problem close-up", "POV reaction", "product reveal", "hands-on demo", "proof close-up", "quick comparison", "direct CTA end card"],
+    "product_demo": ["tight product close-up", "top-down problem setup", "feature macro", "hands-on operation", "result close-up", "side-by-side comparison", "packshot end card"],
+    "cinematic": ["cinematic problem cold open", "slow lifestyle detail", "hero product reveal", "macro feature detail", "smooth use sequence", "lifestyle payoff", "premium packshot"],
 }
 
 
@@ -50,6 +50,11 @@ class ProjectConfig:
     language: str = "ko-KR"
     aspect_ratio: str = "9:16"
     ad_variants: tuple[str, ...] = VARIANTS
+    category: str = ""
+    must_emphasize: str = ""
+    features: str = ""
+    pain_point: str = ""
+    intensity: int = 4
 
 
 def configure_logging() -> logging.Logger:
@@ -59,9 +64,9 @@ def configure_logging() -> logging.Logger:
     if logger.handlers:
         return logger
     logger.setLevel(logging.INFO)
-    fh = logging.FileHandler(log_dir / "app.log", encoding="utf-8")
-    fh.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-    logger.addHandler(fh)
+    handler = logging.FileHandler(log_dir / "app.log", encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.addHandler(handler)
     return logger
 
 
@@ -73,13 +78,13 @@ def log_status(message: str) -> None:
     LOGGER.info(message)
 
 
+def now_kst() -> datetime:
+    return datetime.now(KST)
+
+
 def slugify(text: str) -> str:
     value = re.sub(r"[^0-9A-Za-z가-힣_-]+", "_", (text or "").strip()).strip("_")
     return value or "project"
-
-
-def now_kst() -> datetime:
-    return datetime.now(KST)
 
 
 def build_project_config(
@@ -90,12 +95,19 @@ def build_project_config(
     product_url: str = "",
     product_image: str = "",
     project_id: str | None = None,
+    category: str = "",
+    must_emphasize: str = "",
+    features: str = "",
+    pain_point: str = "",
+    intensity: int = 4,
 ) -> ProjectConfig:
     product_name = (product_name or "").strip()
     if not product_name:
         raise ValueError("product_name is required")
-    if duration_sec not in (15, 30, 60):
-        raise ValueError("duration_sec must be one of 15, 30, 60")
+    if duration_sec not in (15, 30, 45, 60):
+        raise ValueError("duration_sec must be one of 15, 30, 45, 60")
+    if intensity not in (1, 2, 3, 4, 5):
+        raise ValueError("intensity must be 1..5")
     stamp = now_kst().strftime("%Y%m%d_%H%M%S")
     pid = project_id or f"{slugify(product_name)}_{stamp}"
     return ProjectConfig(
@@ -106,6 +118,11 @@ def build_project_config(
         duration_sec=duration_sec,
         product_url=(product_url or "").strip(),
         product_image=(product_image or "").strip(),
+        category=(category or "").strip(),
+        must_emphasize=(must_emphasize or "").strip(),
+        features=(features or "").strip(),
+        pain_point=(pain_point or "").strip(),
+        intensity=intensity,
     )
 
 
@@ -119,6 +136,11 @@ def load_project_config(path: Path) -> ProjectConfig:
         product_url=data.get("product_url", ""),
         product_image=data.get("product_image", ""),
         project_id=data.get("project_id"),
+        category=data.get("category", ""),
+        must_emphasize=data.get("must_emphasize", ""),
+        features=data.get("features", ""),
+        pain_point=data.get("pain_point", ""),
+        intensity=int(data.get("intensity", 4)),
     )
 
 
@@ -135,19 +157,65 @@ def write_text(path: Path, text: str) -> None:
 def allocate_timeline(duration_sec: int, count: int = 7) -> list[tuple[int, int]]:
     if count < 2:
         raise ValueError("scene count must be >= 2")
-    weights = [10, 14, 14, 16, 16, 16, 14]
+    weights = [10, 14, 14, 18, 16, 14, 14]
     if count != len(weights):
         weights = [1] * count
+    total = sum(weights)
     cumulative = 0
     starts = [0]
     for weight in weights[:-1]:
         cumulative += weight
-        starts.append(round(duration_sec * cumulative / sum(weights)))
+        starts.append(round(duration_sec * cumulative / total))
     ends = starts[1:] + [duration_sec]
     timeline = list(zip(starts, ends))
-    if timeline[-1][1] != duration_sec:
-        raise AssertionError("timeline does not end at requested duration")
+    if any(end <= start for start, end in timeline):
+        raise ValueError("duration is too short for scene count")
     return timeline
+
+
+def config_product_context(config: ProjectConfig) -> dict[str, Any]:
+    if hasattr(legacy, "product_profile"):
+        return legacy.product_profile(
+            config.product_name,
+            category=config.category,
+            features=config.features,
+            must_emphasize=config.must_emphasize,
+            pain_point=config.pain_point,
+            target=config.target_audience,
+            description=config.product_description,
+        )
+    return {
+        "product": config.product_name,
+        "category": "general",
+        "category_label": "일반 상품",
+        "target": config.target_audience,
+        "pain_point": config.pain_point or "반복되는 사용 불편",
+        "primary_selling_point": config.must_emphasize or config.product_description or "핵심 기능",
+        "selling_points": [config.must_emphasize or config.product_description or "핵심 기능"],
+        "demo_action": "제품의 대표 기능을 실제 사용 환경에서 보여준다",
+        "proof_action": "실제 작동 과정을 연속으로 보여준다",
+        "environment": "realistic everyday product-use setting",
+        "buyer_motive": "실제 불편을 줄이는 것",
+    }
+
+
+def call_legacy(config: ProjectConfig) -> dict[str, Any]:
+    advanced = bool(config.category or config.must_emphasize or config.features or config.pain_point or config.intensity != 4)
+    if advanced:
+        try:
+            return legacy.generate(
+                config.product_name,
+                category=config.category,
+                features=config.features,
+                must_emphasize=config.must_emphasize,
+                pain_point=config.pain_point,
+                target=config.target_audience,
+                description=config.product_description,
+                intensity=config.intensity,
+            )
+        except TypeError:
+            pass
+    return legacy.generate(config.product_name)
 
 
 def safe_hook(top3: list[dict[str, Any]], index: int, product: str) -> dict[str, Any]:
@@ -155,9 +223,10 @@ def safe_hook(top3: list[dict[str, Any]], index: int, product: str) -> dict[str,
         return top3[index % len(top3)]
     return {
         "rank": index + 1,
-        "text": f"{product}, 사용 전에 이 포인트부터 확인해보세요.",
+        "text": f"{product}, 구매 전에 이 핵심 포인트부터 확인해보세요.",
         "category": "curiosity",
-        "score": 80.0,
+        "angle": "curiosity",
+        "score": 82.0,
         "risk": 0,
         "db_source_id": None,
         "db_hook_id": None,
@@ -165,40 +234,42 @@ def safe_hook(top3: list[dict[str, Any]], index: int, product: str) -> dict[str,
 
 
 def build_variant_beats(config: ProjectConfig, variant: str, hook: dict[str, Any], legacy_data: dict[str, Any]) -> list[dict[str, Any]]:
+    ctx = config_product_context(config)
     product = config.product_name
-    desc = config.product_description or "제품 특징과 사용감을 확인"
     target = config.target_audience
-    cta = legacy_data.get("cta") or "제품 정보와 사용법을 확인해보세요."
+    pain = ctx["pain_point"]
+    point = ctx["primary_selling_point"]
+    cta = legacy_data.get("cta") or "제품의 핵심 기능과 가격 조건을 확인해보세요."
 
     if variant == "ugc":
         content = [
-            ("HOOK", hook["text"], hook["text"], f"{target} 사용자가 카메라를 보며 {product}을 들어 보인다."),
-            ("PROBLEM", f"저는 {product}를 고를 때 광고 문구보다 제 루틴에 잘 맞는지부터 봅니다.", "내 루틴에 맞는지부터", "거울 앞에서 피부 상태를 확인하는 자연스러운 일상 컷."),
-            ("DISCOVERY", f"제가 먼저 본 건 {desc} 같은 제품 특징과 실제 사용 순서였습니다.", "특징 + 사용 순서 확인", f"{product} 패키지를 손에 들고 라벨과 사용법을 확인한다."),
-            ("DEMO", "처음에는 손등에 소량 덜어 제형을 확인하고 얼굴에는 나눠 발라봅니다.", "소량 · 제형 · 나눠 바르기", f"{product} 한 방울을 손등에 덜어 제형을 보여준 뒤 볼에 소량 도포."),
-            ("EXPERIENCE", "바른 뒤에는 끈적임, 밀림, 당김 같은 사용감을 체크해봅니다.", "끈적임 · 밀림 · 당김 체크", "손끝으로 피부 표면을 가볍게 터치하며 사용감을 확인한다."),
-            ("PROOF_SAFE", "한 번의 과장된 변화보다 며칠 동안 내 루틴과 잘 맞는지 기록하며 비교해보세요.", "과장보다 루틴 적합성", "같은 조명과 같은 구도에서 데일리 루틴을 기록하는 화면."),
-            ("CTA", cta, "제품 정보·주의사항 확인", f"{product}과 깔끔한 제품 정보 화면으로 마무리."),
+            ("HOOK", hook["text"], hook["text"], f"{target} 사용자가 {product}을 들고 문제 상황을 바로 언급한다."),
+            ("PROBLEM", f"저는 {pain} 때문에 비슷한 제품을 계속 비교하게 됐습니다.", "이 불편, 계속 반복?", f"{pain}이 드러나는 일상 장면을 짧게 보여준다."),
+            ("DISCOVERY", f"그러다 {product}에서 {point}를 먼저 보게 됐습니다.", f"핵심 포인트: {point}", f"{product}을 가까이 보여주며 핵심 특징을 짚는다."),
+            ("DEMO", f"말로 설명하는 것보다 실제로 써보면 더 빠릅니다. {point}가 어떻게 작동하는지 보세요.", "말보다 실제 사용", ctx["demo_action"]),
+            ("EXPERIENCE", f"제가 보는 기준은 단순합니다. {point}가 실제 불편을 줄이는지입니다.", "체감되는지 확인", ctx["proof_action"]),
+            ("COMPARE", f"비슷한 {product}과 비교할 때도 가격만 보지 말고 {point}를 같이 보세요.", "가격 + 핵심 기능 비교", f"두 선택지를 나란히 두고 {point} 기준으로 비교한다."),
+            ("CTA", cta, "가격 · 조건 · 핵심 기능 확인", f"{product}과 {point}를 한 화면에 정리한 엔드카드."),
         ]
     elif variant == "product_demo":
         content = [
-            ("HOOK", hook["text"], hook["text"], f"{product}을 프레임 중앙에 크게 보여준다."),
-            ("SETUP", f"{product}에서 먼저 확인할 것은 제품 특징, 제형, 그리고 사용 방법입니다.", "특징 · 제형 · 사용법", "제품과 핵심 체크 포인트를 상단 촬영으로 정리한다."),
-            ("DISPENSE", "용기에서 소량을 덜어 실제 토출량을 먼저 보여드릴게요.", "실제 토출량 확인", f"펌프 또는 드로퍼에서 {product}을 정확히 한 번 덜어낸다."),
-            ("TEXTURE", f"손등에서 펴 발라 {desc}와 관련된 제형 특성을 과장 없이 보여줍니다.", "제형을 가까이 확인", "매크로 촬영으로 펴 발리는 질감과 잔여감을 보여준다."),
-            ("APPLICATION", "얼굴에는 소량씩 나눠 바르고 다른 제품과 함께 쓸 때 밀림도 확인합니다.", "소량씩 나눠 사용", "볼과 이마에 소량씩 점을 찍어 부드럽게 펴 바른다."),
-            ("CHECK", "마무리 후에는 광택만 보지 말고 끈적임과 당김 등 실제 사용감을 같이 확인하세요.", "사용감까지 체크", "같은 조명 아래에서 피부 표면과 손끝 반응을 보여준다."),
-            ("CTA", cta, "제품 페이지에서 상세 확인", f"{product} 정면 패키지와 간결한 CTA 엔드카드."),
+            ("HOOK", hook["text"], hook["text"], f"{product}을 첫 프레임 중앙에 크게 보여준다."),
+            ("SETUP", f"먼저 해결하려는 문제는 {pain}입니다.", "문제부터 확인", f"실제 문제 상황을 제품 없이 먼저 보여준다."),
+            ("FEATURE", f"이 제품에서 가장 먼저 볼 것은 {point}입니다.", f"핵심: {point}", f"제품의 {point} 관련 부위나 기능을 클로즈업한다."),
+            ("DEMO", f"이제 실제로 작동시켜 보겠습니다. 광고 문구보다 사용 장면을 보세요.", "실제로 작동시켜 보기", ctx["demo_action"]),
+            ("PROOF", f"핵심은 {point}가 실제 사용에서 체감되는지입니다.", "실사용 체크", ctx["proof_action"]),
+            ("COMPARE", f"구매 전에는 같은 가격대 제품과 {point} 기준으로 비교해보세요.", "같은 조건으로 비교", f"동일한 사용 조건에서 핵심 기능을 비교하는 컷."),
+            ("CTA", cta, "상세 조건 확인", f"{product} 정면 팩샷과 핵심 기능·가격 확인 CTA."),
         ]
     elif variant == "cinematic":
         content = [
-            ("HOOK", hook["text"], hook["text"], "부드러운 빛 속 인물의 피부와 제품 실루엣을 짧게 교차한다."),
-            ("MOOD", f"매일 반복하는 루틴에서 {product}은 복잡함보다 꾸준히 쓰기 좋은 경험을 목표로 합니다.", "매일의 루틴을 더 단순하게", "아침 빛이 들어오는 세면대와 정돈된 스킨케어 장면."),
-            ("REVEAL", f"{product}의 디자인과 {desc} 포인트를 차분한 제품 히어로 컷으로 보여줍니다.", "제품의 핵심을 한눈에", f"천천히 회전하는 {product} 패키지와 라벨 디테일."),
-            ("TEXTURE", "한 방울의 제형과 퍼지는 움직임을 매크로로 담아 실제 질감을 강조합니다.", "한 방울의 질감", "극근접 촬영으로 제형이 표면에 닿고 퍼지는 순간을 보여준다."),
-            ("RITUAL", "얼굴에는 필요한 만큼만 덜어 천천히 흡수시키며 루틴을 이어갑니다.", "필요한 만큼, 차분하게", "슬로우한 손동작으로 볼과 이마에 제품을 펴 바른다."),
-            ("LIFESTYLE", "과장된 변신보다 매일 부담 없이 이어갈 수 있는 사용 경험을 보여줍니다.", "매일 이어지는 사용 경험", "자연광 아래 준비를 마친 인물의 편안한 표정과 일상 컷."),
-            ("CTA", cta, "제품 정보 확인", f"프리미엄 라이팅의 {product} 팩샷으로 마무리."),
+            ("HOOK", hook["text"], hook["text"], f"{pain}이 드러나는 강한 첫 장면 뒤 {product} 실루엣을 짧게 공개한다."),
+            ("MOOD", f"반복되는 불편은 작아 보여도 매일 쌓입니다. {pain}이 그런 순간입니다.", "작은 불편이 매일 쌓일 때", f"{ctx['environment']}에서 문제 상황을 감각적으로 보여준다."),
+            ("REVEAL", f"{product}의 중심은 화려한 기능 수가 아니라 {point}입니다.", f"중심은 {point}", f"프리미엄 라이팅으로 {product}와 핵심 기능을 히어로 컷으로 보여준다."),
+            ("DETAIL", f"{point}가 실제 사용에서 어떻게 연결되는지 가까이 보여드립니다.", "기능을 눈으로 확인", ctx["demo_action"]),
+            ("PAYOFF", f"목표는 하나입니다. {ctx['buyer_motive']}.", "불편은 줄이고 사용은 단순하게", ctx["proof_action"]),
+            ("LIFESTYLE", f"과장된 변화보다 실제 생활에서 반복해서 쓰게 되는 이유를 보여줍니다.", "실생활에서 계속 쓰는 이유", f"{ctx['environment']}에서 자연스럽게 제품을 사용하는 라이프스타일 장면."),
+            ("CTA", cta, "핵심 기능 확인", f"프리미엄 팩샷과 {point} 한 줄로 마무리."),
         ]
     else:
         raise ValueError(f"unsupported variant: {variant}")
@@ -224,29 +295,31 @@ def build_variant_beats(config: ProjectConfig, variant: str, hook: dict[str, Any
 
 
 def image_prompt(config: ProjectConfig, variant: str, scene: dict[str, Any]) -> str:
-    direction = VARIANT_DIRECTIONS[variant]
+    ctx = config_product_context(config)
     return (
-        f"Vertical {config.aspect_ratio} Korean beauty advertising still for {config.product_name}. "
-        f"Audience: {config.target_audience}. Creative direction: {direction}. "
-        f"Scene purpose: {scene['role']}. Visual: {scene['visual']} "
-        f"Camera composition: {scene['camera']}. Natural realistic skin texture, premium clean environment, "
-        "soft controlled lighting, readable product-focused composition, consistent product packaging, "
-        "no medical claim visualization, no exaggerated before-and-after transformation, no text baked into image."
+        f"Vertical {config.aspect_ratio} Korean advertising still for {config.product_name}. "
+        f"Product category: {ctx['category_label']}. Audience: {config.target_audience}. "
+        f"Creative direction: {VARIANT_DIRECTIONS[variant]}. Scene purpose: {scene['role']}. "
+        f"Visual: {scene['visual']} Camera composition: {scene['camera']}. Environment: {ctx['environment']}. "
+        "Realistic product-focused commercial, premium controlled lighting, consistent product packaging, strong visual hierarchy, "
+        "no text baked into image, no fabricated review evidence, no fake scarcity, no unsupported medical or performance claim visualization."
     )
 
 
 def video_prompt(config: ProjectConfig, variant: str, scene: dict[str, Any], model: str) -> str:
+    ctx = config_product_context(config)
     base = (
-        f"Vertical {config.aspect_ratio} Korean beauty short-form ad for {config.product_name}. "
-        f"Duration about {scene['duration_sec']} seconds. Creative direction: {VARIANT_DIRECTIONS[variant]}. "
-        f"Scene purpose: {scene['role']}. Action: {scene['visual']} Camera: {scene['camera']}. "
-        "Natural realistic skin texture, consistent product label, subtle authentic hand motion, premium clean lighting, "
-        "no medical claims, no exaggerated transformation."
+        f"Vertical {config.aspect_ratio} Korean short-form ad for {config.product_name}. "
+        f"Product category: {ctx['category_label']}. Duration about {scene['duration_sec']} seconds. "
+        f"Creative direction: {VARIANT_DIRECTIONS[variant]}. Scene purpose: {scene['role']}. "
+        f"Action: {scene['visual']} Camera: {scene['camera']}. Environment: {ctx['environment']}. "
+        "Realistic product use, consistent packaging, strong first frame, natural human interaction, no fabricated testimonials, "
+        "no fake scarcity, no unsupported medical or performance claims."
     )
     suffix = {
         "kling": " Controlled motion, realistic physics, stable identity and packaging, smooth social-ad pacing.",
-        "veo": " Cinematic lensing, gentle camera movement, coherent continuity, realistic liquid physics and room ambience.",
-        "seedance": " Strong first frame, concise motion, dynamic but stable camera movement, clean product-hand interaction.",
+        "veo": " Cinematic lensing, gentle camera movement, coherent continuity and realistic room ambience.",
+        "seedance": " Strong first frame, concise motion, dynamic but stable camera movement, clear product interaction.",
     }.get(model, " Natural motion and continuity.")
     return base + suffix
 
@@ -258,22 +331,23 @@ def format_timestamp(seconds: int) -> str:
 
 
 def render_srt(scenes: list[dict[str, Any]]) -> str:
-    blocks = []
-    for index, scene in enumerate(scenes, 1):
-        blocks.append(
-            f"{index}\n{format_timestamp(scene['start_sec'])} --> {format_timestamp(scene['end_sec'])}\n{scene['caption']}"
-        )
-    return "\n\n".join(blocks) + "\n"
+    return "\n\n".join(
+        f"{index}\n{format_timestamp(scene['start_sec'])} --> {format_timestamp(scene['end_sec'])}\n{scene['caption']}"
+        for index, scene in enumerate(scenes, 1)
+    ) + "\n"
 
 
 def render_script_md(config: ProjectConfig, variant: str, scenes: list[dict[str, Any]], hook: dict[str, Any]) -> str:
+    ctx = config_product_context(config)
     lines = [
         f"# {VARIANT_LABELS[variant]} — {config.product_name}", "",
+        f"- 카테고리: {ctx['category_label']}",
         f"- 타깃: {config.target_audience}",
         f"- 길이: {config.duration_sec}초",
+        f"- 강조 포인트: {ctx['primary_selling_point']}",
+        f"- 광고 강도: {config.intensity}/5",
         f"- 방향: {VARIANT_DIRECTIONS[variant]}",
-        f"- Hook score: {hook.get('score', 0)}",
-        f"- DB Hook: hook_id={hook.get('db_hook_id')} / source_id={hook.get('db_source_id')}", "",
+        f"- Hook score: {hook.get('score', 0)}", "",
     ]
     for scene in scenes:
         lines += [
@@ -290,45 +364,34 @@ def render_storyboard_md(config: ProjectConfig, variant: str, scenes: list[dict[
     for scene in scenes:
         lines += [
             f"## Scene {scene['scene_no']} · {scene['start_sec']}~{scene['end_sec']}초",
-            f"- 목적: {scene['role']}",
-            f"- 화면: {scene['visual']}",
-            f"- 카메라: {scene['camera']}",
-            f"- 내레이션: {scene['spoken']}",
-            f"- 자막: {scene['caption']}",
-            f"- 전환: {scene['transition']}", "",
+            f"- 목적: {scene['role']}", f"- 화면: {scene['visual']}", f"- 카메라: {scene['camera']}",
+            f"- 내레이션: {scene['spoken']}", f"- 자막: {scene['caption']}", f"- 전환: {scene['transition']}", "",
         ]
     return "\n".join(lines)
 
 
 def render_strategy_md(config: ProjectConfig, legacy_data: dict[str, Any], variants: dict[str, Any]) -> str:
+    ctx = config_product_context(config)
     db = legacy_data.get("db_integration", {})
     lines = [
         f"# 광고 전략 — {config.product_name}", "",
         "## 프로젝트",
-        f"- Project ID: `{config.project_id}`",
-        f"- 타깃: {config.target_audience}",
-        f"- 광고 길이: {config.duration_sec}초",
-        f"- 제품 설명: {config.product_description or '미입력'}",
-        f"- 화면비: {config.aspect_ratio}", "",
-        "## DB 근거",
-        f"- DB 연결: **{'YES' if db.get('connected') else 'NO'}**",
-        f"- DB counts: `{json.dumps(db.get('counts', {}), ensure_ascii=False)}`",
-        f"- TOP3 다양성: `{db.get('top3_diversity', {})}`", "",
+        f"- Project ID: `{config.project_id}`", f"- 카테고리: {ctx['category_label']}", f"- 타깃: {config.target_audience}",
+        f"- 광고 길이: {config.duration_sec}초", f"- 광고 강도: {config.intensity}/5",
+        f"- 제품 설명: {config.product_description or '미입력'}", f"- 반드시 강조: {ctx['primary_selling_point']}",
+        f"- Pain Point: {ctx['pain_point']}", "",
+        "## DB 근거", f"- DB 연결: **{'YES' if db.get('connected') else 'NO'}**",
+        f"- DB counts: `{json.dumps(db.get('counts', {}), ensure_ascii=False)}`", "",
         "## 크리에이티브 3종",
     ]
     for variant in VARIANTS:
         item = variants[variant]
-        lines += [
-            f"### {VARIANT_LABELS[variant]}",
-            f"- 방향: {VARIANT_DIRECTIONS[variant]}",
-            f"- 선택 Hook: {item['hook']['text']}",
-            f"- Hook score: {item['hook'].get('score', 0)}", "",
-        ]
+        lines += [f"### {VARIANT_LABELS[variant]}", f"- 방향: {VARIANT_DIRECTIONS[variant]}", f"- 선택 Hook: {item['hook']['text']}", ""]
     lines += [
         "## 운영 원칙",
-        "- 치료·완치·확정적 효능 표현은 생성 단계에서 차단 대상으로 검사합니다.",
-        "- 전후 비교는 과장된 변신 연출 대신 동일 조건의 사용 경험 비교로 제한합니다.",
-        "- 실제 집행 전 제품 상세정보·표시광고 문구·플랫폼 정책을 최종 확인합니다.",
+        "- 카테고리에 맞는 실제 사용 환경을 사용하고, 뷰티가 아닌 상품에 피부·제형·도포 표현을 강제로 넣지 않습니다.",
+        "- 사용자가 입력한 수치·성능·효능은 집행 전에 공식 상세페이지 또는 제조사 자료로 사실 확인합니다.",
+        "- 허위 후기, 가짜 희소성, 근거 없는 1위·최고·100% 표현을 사용하지 않습니다.",
     ]
     return "\n".join(lines)
 
@@ -340,31 +403,24 @@ def claim_hits(text: str) -> list[str]:
 
 def score_variant(hook: dict[str, Any], scenes: list[dict[str, Any]]) -> dict[str, Any]:
     hook_strength = round(min(100.0, float(hook.get("score") or 0)), 1)
-    cta_text = scenes[-1]["spoken"] if scenes else ""
-    cta_clarity = 92.0 if any(x in cta_text for x in ("확인", "저장", "댓글", "제품")) else 78.0
-    product_focus = round(sum(1 for s in scenes if s.get("visual")) / max(1, len(scenes)) * 100, 1)
-    clarity = round(sum(1 for s in scenes if s.get("caption") and s.get("spoken")) / max(1, len(scenes)) * 100, 1)
     all_text = " ".join(s.get("spoken", "") + " " + s.get("caption", "") for s in scenes)
     risk_hits = claim_hits(all_text)
-    safety = 100.0 if not risk_hits else 50.0
-    total = round(hook_strength * .30 + cta_clarity * .20 + product_focus * .20 + clarity * .15 + safety * .15, 1)
+    scroll_stop = 92.0 if scenes and len(scenes[0].get("spoken", "")) <= 85 else 84.0
+    curiosity = 90.0 if "?" in (scenes[0].get("spoken", "") if scenes else "") else 86.0
+    purchase = 92.0 if any("핵심" in s.get("caption", "") or "가격" in s.get("caption", "") for s in scenes) else 84.0
+    clarity = round(sum(bool(s.get("caption") and s.get("spoken")) for s in scenes) / max(1, len(scenes)) * 100, 1)
+    credibility = 94.0 if not risk_hits else 60.0
+    total = round(hook_strength * .30 + scroll_stop * .20 + curiosity * .15 + purchase * .15 + clarity * .10 + credibility * .10, 1)
     return {
-        "hook_strength": hook_strength,
-        "cta_clarity": cta_clarity,
-        "product_focus": product_focus,
-        "clarity": clarity,
-        "claim_safety": safety,
-        "total": total,
-        "risk_hits": risk_hits,
+        "hook_strength": hook_strength, "scroll_stop_power": scroll_stop, "curiosity_gap": curiosity,
+        "purchase_desire": purchase, "clarity": clarity, "credibility": credibility, "total": total, "risk_hits": risk_hits,
     }
 
 
 def build_compliance_report(variants: dict[str, Any]) -> dict[str, Any]:
     report: dict[str, Any] = {"status": "PASS", "banned_claims": list(BANNED_CLAIMS), "variants": {}}
     for name, item in variants.items():
-        combined = " ".join(
-            s["spoken"] + " " + s["caption"] + " " + s["visual"] for s in item["scenes"]
-        )
+        combined = " ".join(s["spoken"] + " " + s["caption"] + " " + s["visual"] for s in item["scenes"])
         hits = claim_hits(combined)
         status = "PASS" if not hits else "BLOCK"
         if hits:
@@ -374,8 +430,8 @@ def build_compliance_report(variants: dict[str, Any]) -> dict[str, Any]:
 
 
 def generate_package(config: ProjectConfig, outdir: Path, require_db: bool = False) -> Path:
-    log_status("[1/9] 기존 Content DB + Script Generator 연결 확인")
-    legacy_data = legacy.generate(config.product_name)
+    log_status("[1/9] Content DB + Script Generator V2.4 연결 확인")
+    legacy_data = call_legacy(config)
     db_connected = bool(legacy_data.get("db_integration", {}).get("connected"))
     if require_db and not db_connected:
         raise RuntimeError("Content DB is not connected or empty")
@@ -388,11 +444,12 @@ def generate_package(config: ProjectConfig, outdir: Path, require_db: bool = Fal
     project_payload = asdict(config)
     project_payload["ad_variants"] = list(config.ad_variants)
     project_payload["created_at_kst"] = now_kst().isoformat(timespec="seconds")
+    project_payload["product_analysis"] = config_product_context(config)
     project_payload["db_integration"] = legacy_data.get("db_integration", {})
     write_json(project_dir / "project.json", project_payload)
 
     variants: dict[str, Any] = {}
-    log_status("[3/9] UGC / Product Demo / Cinematic 3종 스크립트 생성")
+    log_status("[3/9] UGC / Product Demo / Cinematic 카테고리 중립 스크립트 생성")
     for idx, variant in enumerate(VARIANTS):
         hook = safe_hook(top3, idx, config.product_name)
         scenes = build_variant_beats(config, variant, hook, legacy_data)
@@ -413,27 +470,20 @@ def generate_package(config: ProjectConfig, outdir: Path, require_db: bool = Fal
     for variant, item in variants.items():
         variant_dir = project_dir / variant
         scenes = item["scenes"]
-        image_prompts = [
-            {"scene_no": s["scene_no"], "prompt": image_prompt(config, variant, s)} for s in scenes
-        ]
-        video_prompts = {
-            model: [
-                {"scene_no": s["scene_no"], "prompt": video_prompt(config, variant, s, model)} for s in scenes
-            ]
+        write_json(variant_dir / "image_prompts.json", [{"scene_no": s["scene_no"], "prompt": image_prompt(config, variant, s)} for s in scenes])
+        write_json(variant_dir / "video_prompts.json", {
+            model: [{"scene_no": s["scene_no"], "prompt": video_prompt(config, variant, s, model)} for s in scenes]
             for model in ("kling", "veo", "seedance")
-        }
-        write_json(variant_dir / "image_prompts.json", image_prompts)
-        write_json(variant_dir / "video_prompts.json", video_prompts)
+        })
 
     log_status("[7/9] voiceover.txt + subtitles.srt 생성")
     for variant, item in variants.items():
         variant_dir = project_dir / variant
         scenes = item["scenes"]
-        voiceover = "\n".join(s["spoken"] for s in scenes)
-        write_text(variant_dir / "voiceover.txt", voiceover)
+        write_text(variant_dir / "voiceover.txt", "\n".join(s["spoken"] for s in scenes))
         write_text(variant_dir / "subtitles.srt", render_srt(scenes))
 
-    log_status("[8/9] 광고 점수 + 금지 표현 Compliance 검사")
+    log_status("[8/9] Creative Score + Compliance 검사")
     scores = {variant: score_variant(item["hook"], item["scenes"]) for variant, item in variants.items()}
     scores["recommended_variant"] = max(VARIANTS, key=lambda name: scores[name]["total"])
     compliance = build_compliance_report(variants)
@@ -447,12 +497,11 @@ def generate_package(config: ProjectConfig, outdir: Path, require_db: bool = Fal
     for variant in VARIANTS:
         expected.extend([
             f"{variant}/script.md", f"{variant}/storyboard.md", f"{variant}/shot_list.json",
-            f"{variant}/image_prompts.json", f"{variant}/video_prompts.json",
-            f"{variant}/voiceover.txt", f"{variant}/subtitles.srt",
+            f"{variant}/image_prompts.json", f"{variant}/video_prompts.json", f"{variant}/voiceover.txt", f"{variant}/subtitles.srt",
         ])
     missing = [rel for rel in expected if not (project_dir / rel).exists()]
     manifest = {
-        "milestone": "CREATIVE_PACKAGE_V1",
+        "milestone": "CREATIVE_PACKAGE_V1_CATEGORY_NEUTRAL",
         "status": "PASS" if not missing else "FAIL",
         "project_id": config.project_id,
         "generated_files": expected,
@@ -463,19 +512,23 @@ def generate_package(config: ProjectConfig, outdir: Path, require_db: bool = Fal
     write_json(project_dir / "manifest.json", manifest)
     if missing:
         raise RuntimeError(f"Package validation failed; missing={missing}")
-
-    log_status(f"CREATIVE_PACKAGE_V1 PASS: {project_dir}")
+    log_status(f"CREATIVE_PACKAGE PASS: {project_dir}")
     return project_dir
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Generate Creative Package V1 from Content DB")
+    parser = argparse.ArgumentParser(description="Generate category-neutral Creative Package from Content DB")
     parser.add_argument("product", nargs="?", help="상품명")
     parser.add_argument("--description", default="", help="상품 설명")
     parser.add_argument("--target", default="일반 소비자", help="타깃 고객")
-    parser.add_argument("--duration", type=int, choices=(15, 30, 60), default=30, help="광고 길이")
-    parser.add_argument("--url", default="", help="상품 URL (메타데이터 저장용)")
-    parser.add_argument("--image", default="", help="상품 이미지 경로 (메타데이터 저장용)")
+    parser.add_argument("--duration", type=int, choices=(15, 30, 45, 60), default=30, help="광고 길이")
+    parser.add_argument("--category", default="", help="카테고리 직접 지정")
+    parser.add_argument("--must-emphasize", default="", help="반드시 강조할 Selling Point")
+    parser.add_argument("--features", default="", help="추가 특징")
+    parser.add_argument("--pain-point", default="", help="고객 Pain Point")
+    parser.add_argument("--intensity", type=int, choices=(1, 2, 3, 4, 5), default=4, help="광고 강도")
+    parser.add_argument("--url", default="", help="상품 URL")
+    parser.add_argument("--image", default="", help="상품 이미지 경로")
     parser.add_argument("--project-file", type=Path, help="기존 project.json으로 재생성")
     parser.add_argument("--project-id", default=None)
     parser.add_argument("--outdir", type=Path, default=ROOT / "outputs_creative")
@@ -492,13 +545,10 @@ def main() -> int:
             if not args.product:
                 raise ValueError("product is required unless --project-file is used")
             config = build_project_config(
-                product_name=args.product,
-                product_description=args.description,
-                target_audience=args.target,
-                duration_sec=args.duration,
-                product_url=args.url,
-                product_image=args.image,
-                project_id=args.project_id,
+                product_name=args.product, product_description=args.description, target_audience=args.target,
+                duration_sec=args.duration, product_url=args.url, product_image=args.image, project_id=args.project_id,
+                category=args.category, must_emphasize=args.must_emphasize, features=args.features,
+                pain_point=args.pain_point, intensity=args.intensity,
             )
         project_dir = generate_package(config, args.outdir, require_db=args.require_db)
         print("OUTPUT_DIR=", project_dir)
@@ -507,7 +557,7 @@ def main() -> int:
         tb = traceback.format_exc()
         print("ERROR:", exc)
         print(tb)
-        LOGGER.error("Creative Package V1 failed: %s\n%s", exc, tb)
+        LOGGER.error("Creative Package failed: %s\n%s", exc, tb)
         return 1
 
 
