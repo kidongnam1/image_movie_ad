@@ -30,14 +30,13 @@ V2.5의 강한 Hook/카테고리 중립 구조 위에 **실제 광고 성과를 
 - `VERIFY_DB_GENERATOR.bat` → V2.6 검증 확장
 - `requirements.txt` → `openpyxl` 추가
 - `README_V2_KO.md` → V2.6 운영 루프 반영
+- `.gitignore` → 운영 성과 DB/WAL/SHM 제외
 
 ## 성과 DB
 
 `database/ad_performance.sqlite`
 
-기존 `database/content_script.sqlite`와 분리합니다.
-
-성과 행은 SHA-256 fingerprint로 중복 삽입을 방지합니다.
+기존 `database/content_script.sqlite`와 분리합니다. 성과 행은 SHA-256 fingerprint로 중복 삽입을 방지합니다.
 
 ## 지원 성과 파일
 
@@ -73,27 +72,39 @@ spend
 
 | 항목 | 비중 |
 |---|---:|
-| 2초 유지율 | 25% |
-| 3초 유지율 | 15% |
+| 2초 유지율 | 20% |
+| 3초 유지율 | 10% |
 | CTR | 25% |
+| 상세페이지 유입률 | 10% |
 | 구매전환율(click→purchase) | 25% |
 | ROAS | 10% |
+
+## 학습 단위
+
+성과는 세 단계로 반영합니다.
+
+1. `category + angle` 성과
+2. 동일 `hook_text` 성과
+3. 동일 `creative_id` 성과
+
+상한:
+
+- Angle: ±6점
+- Hook: ±3점
+- Creative: ±2점
+- 최종 합산: ±8점
 
 ## 과적합 방지
 
 - 작은 표본은 Bayesian shrinkage 적용
 - 노출 200 미만은 confidence 추가 축소
+- Hook/Creative 직접 보정은 노출 200 미만이면 0점
 - 노출이 누적될수록 학습 영향 증가
-- Angle 성과 보정은 최대 `-6 ~ +6`점
 - 안전/품질 Gate를 우회하지 않고 Gate 통과 후보의 순위만 조정
 
 ## 카테고리 학습
 
-가능하면 `category + angle` 성과를 우선 사용합니다.
-
-카테고리 표본이 적으면 전체 Angle 성과를 제한적으로 섞습니다.
-
-예:
+가능하면 `category + angle` 성과를 우선 사용합니다. 카테고리 표본이 적으면 전체 Angle 성과를 제한적으로 섞습니다.
 
 ```text
 golf/problem_attack 성과 충분 → 골프 문제공격형 성과 우선
@@ -108,7 +119,7 @@ golf/problem_attack 성과 충분 → 골프 문제공격형 성과 우선
 - 성과 보정 0점
 - A/B/C 권장 배분 34/33/33
 
-성과 누적 노출이 충분하면:
+누적 성과 노출이 5,000 이상이면:
 
 - 학습 점수 반영
 - 기본 A/B/C 배분 40/30/30
@@ -121,9 +132,7 @@ golf/problem_attack 성과 충분 → 골프 문제공격형 성과 우선
 CR-XXXXXXXXXXXX
 ```
 
-ID는 `상품 + 카테고리 + Angle + Hook`을 기반으로 결정적으로 생성합니다.
-
-이 ID를 실제 광고 이름/메모에 남긴 뒤 성과 파일의 `creative_id`에 다시 넣으면 추적이 쉽습니다.
+ID는 `상품 + 카테고리 + Angle + Hook`을 기반으로 결정적으로 생성합니다. 이 ID를 실제 광고 이름/메모에 남긴 뒤 성과 파일의 `creative_id`에 다시 넣으면 동일 Creative 성과를 직접 추적할 수 있습니다.
 
 ## Creative Package
 
@@ -138,9 +147,7 @@ V2.6에서 추가되는 파일:
 
 ## 안전 범위
 
-이 패치는 실제 Meta/TikTok/Naver 광고를 자동 게시하거나 예산을 지출하지 않습니다.
-
-그 단계는 비용 발생 및 외부 서비스 변경이므로 별도 승인 후 수행해야 합니다.
+이 패치는 실제 Meta/TikTok/Naver 광고를 자동 게시하거나 예산을 지출하지 않습니다. 그 단계는 비용 발생 및 외부 서비스 변경이므로 별도 승인 후 수행해야 합니다.
 
 ## 검증
 
@@ -152,8 +159,10 @@ VERIFY_DB_GENERATOR.bat
 
 - 좋은 `problem_attack` 성과 → 양(+) 보정
 - 낮은 `comparison` 성과 → 음(-) 보정
+- 동일 Hook/Creative 성과 → 직접 보정
 - 작은 표본 → 거의 0점으로 축소
 - 중복 import → SKIP
 - 잘못된 funnel 수치 → 오류 행으로 거부
 - Cold Start → 성과 보정 0점
 - A/B/C 후보 항상 3개
+- Creative Package에 학습 sidecar 생성
